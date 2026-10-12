@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saca los culos</title>
+    <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #222;
+        }
+
+        main {
+            width: min(1100px, calc(100% - 2rem));
+            margin: 0 auto;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0 0 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .gallery img {
+            display: block;
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgb(0 0 0 / 20%);
+        }
+
+        @media (max-width: 800px) {
+            .gallery {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 560px) {
+            .gallery {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Saca los culos vota</h1>
+        <section class="gallery" aria-label="Galería de imágenes">
+            <img src="imagenes/28838659.jpg" alt="Foto de galería 1">
+            <img src="imagenes/images (1).jpg" alt="Foto de galería 2">
+            <img src="imagenes/images (2).jpg" alt="Foto de galería 3">
+            <img src="imagenes/images (3).jpg" alt="Foto de galería 4">
+            <img src="imagenes/images.jpg" alt="Foto de galería 5">
+            <img src="imagenes/Priscilla Lopez 2.jpeg" alt="Foto de galería 6">
+            <img src="imagenes/priscilla-lopez_01.jpg" alt="Foto de galería 7">
+            <img src="imagenes/Priscillalopezm.jpg" alt="Foto de galería 8">
+        </section>
+    </main>
+</body>
+</html>
