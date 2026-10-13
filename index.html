@@ -227,7 +227,7 @@
     <div id="error-message"></div>
   </div>
 
-  <!-- Panel de la Galería Privada -->
+  <!-- Panel de la Galería Compartida -->
   <div id="gallery-box" class="hidden">
     <div class="user-header">
       <div>
@@ -238,16 +238,16 @@
     </div>
 
     <div class="gallery-grid" id="gallery-grid">
-      <!-- Fotos fijas locales de tu carpeta -->
-      <div class="gallery-item"><img src="imagenes/28838659.jpg" alt="Foto" onclick="openZoom(this.src)"></div>
-      <div class="gallery-item"><img src="imagenes/images (1).jpg" alt="Foto" onclick="openZoom(this.src)"></div>
-      <div class="gallery-item"><img src="imagenes/images (2).jpg" alt="Foto" onclick="openZoom(this.src)"></div>
-      <div class="gallery-item"><img src="imagenes/images (3).jpg" alt="Foto" onclick="openZoom(this.src)"></div>
-      <div class="gallery-item"><img src="imagenes/images (4).jpg" alt="Foto" onclick="openZoom(this.src)"></div>
-      <div class="gallery-item"><img src="imagenes/images.jpg" alt="Foto" onclick="openZoom(this.src)"></div>
-      <div class="gallery-item"><img src="imagenes/Priscilla Lopez 2.jpeg" alt="Foto" onclick="openZoom(this.src)"></div>
-      <div class="gallery-item"><img src="imagenes/priscilla-lopez_01.jpg" alt="Foto" onclick="openZoom(this.src)"></div>
-      <div class="gallery-item"><img src="imagenes/Priscillalopezm.jpg" alt="Foto" onclick="openZoom(this.src)"></div>
+      <!-- Fotos fijas locales de la plantilla base -->
+      <div class="gallery-item static-item"><img src="imagenes/28838659.jpg" alt="Foto" onclick="openZoom(this.src)"></div>
+      <div class="gallery-item static-item"><img src="imagenes/images (1).jpg" alt="Foto" onclick="openZoom(this.src)"></div>
+      <div class="gallery-item static-item"><img src="imagenes/images (2).jpg" alt="Foto" onclick="openZoom(this.src)"></div>
+      <div class="gallery-item static-item"><img src="imagenes/images (3).jpg" alt="Foto" onclick="openZoom(this.src)"></div>
+      <div class="gallery-item static-item"><img src="imagenes/images (4).jpg" alt="Foto" onclick="openZoom(this.src)"></div>
+      <div class="gallery-item static-item"><img src="imagenes/images.jpg" alt="Foto" onclick="openZoom(this.src)"></div>
+      <div class="gallery-item static-item"><img src="imagenes/Priscilla Lopez 2.jpeg" alt="Foto" onclick="openZoom(this.src)"></div>
+      <div class="gallery-item static-item"><img src="imagenes/priscilla-lopez_01.jpg" alt="Foto" onclick="openZoom(this.src)"></div>
+      <div class="gallery-item static-item"><img src="imagenes/Priscillalopezm.jpg" alt="Foto" onclick="openZoom(this.src)"></div>
     </div>
   </div>
 
@@ -284,6 +284,9 @@
     const errorMessage = document.getElementById('error-message');
     const grid = document.getElementById('gallery-grid');
 
+    let currentUser = null;
+    let unsubscribeMedia = null;
+
     // Registrar usuario
     function register() {
       const email = document.getElementById('email').value;
@@ -313,39 +316,48 @@
       auth.signOut();
     }
 
-    // Cargar fotos guardadas en Firestore
+    // Cargar TODAS las fotos subidas (galería compartida entre todos los usuarios)
     function loadSavedMedia() {
-      db.collection('media').onSnapshot(snapshot => {
-        snapshot.docChanges().forEach(change => {
-          if (change.type === 'added') {
-            const data = change.doc.data();
-            const item = document.createElement('div');
-            item.className = 'gallery-item';
+      document.querySelectorAll('.dynamic-item').forEach(el => el.remove());
 
-            if (data.type === 'video') {
-              item.innerHTML = `<video src="${data.url}" controls></video>`;
-            } else {
-              item.innerHTML = `<img src="${data.url}" alt="Media" onclick="openZoom('${data.url}')">`;
+      if (unsubscribeMedia) unsubscribeMedia();
+
+      unsubscribeMedia = db.collection('media')
+        .onSnapshot(snapshot => {
+          snapshot.docChanges().forEach(change => {
+            if (change.type === 'added') {
+              const data = change.doc.data();
+              const item = document.createElement('div');
+              item.className = 'gallery-item dynamic-item';
+
+              if (data.type === 'video') {
+                item.innerHTML = `<video src="${data.url}" controls></video>`;
+              } else {
+                item.innerHTML = `<img src="${data.url}" alt="Media" onclick="openZoom('${data.url}')">`;
+              }
+              grid.prepend(item);
             }
-            grid.prepend(item);
-          }
+          });
+        }, error => {
+          console.error("Error al obtener imágenes:", error);
         });
-      }, error => {
-        console.error("Error al obtener imágenes de Firestore:", error);
-      });
     }
 
     // Escuchar cambios de sesión
     auth.onAuthStateChanged(user => {
       if (user) {
+        currentUser = user;
         authBox.classList.add('hidden');
         galleryBox.classList.remove('hidden');
         userEmailSpan.innerText = user.email;
         loadSavedMedia();
       } else {
+        currentUser = null;
+        if (unsubscribeMedia) unsubscribeMedia();
         authBox.classList.remove('hidden');
         galleryBox.classList.add('hidden');
         userEmailSpan.innerText = "";
+        document.querySelectorAll('.dynamic-item').forEach(el => el.remove());
       }
     });
 
@@ -401,7 +413,7 @@
       resetZoomState();
     }
 
-    // Zoom usando la rueda del ratón (Mouse Wheel)
+    // Zoom con rueda del ratón
     modal.addEventListener('wheel', (e) => {
       e.preventDefault();
       if (e.deltaY < 0) {
@@ -416,7 +428,7 @@
       updateTransform();
     }, { passive: false });
 
-    // Arrastrar la imagen cuando tiene zoom
+    // Arrastrar imagen ampliada
     modalImg.addEventListener('mousedown', (e) => {
       if (currentScale > 1) {
         isDragging = true;
@@ -437,29 +449,32 @@
       isDragging = false;
     });
 
-    // Cerrar al hacer clic en el fondo oscuro
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
         closeZoom();
       }
     });
 
-    // Widget de Cloudinary + Guardado inmediato (Preset oemolwiq en modo Unsigned)
+    // Widget de Cloudinary (Guarda autoría pero publica para todos)
     const myWidget = cloudinary.createUploadWidget({
       cloudName: 'ox4v1r1w', 
       uploadPreset: 'oemolwiq'
     }, (error, result) => { 
       if (!error && result && result.event === "success") { 
+        if (!currentUser) return;
+
         const mediaUrl = result.info.secure_url;
         const resourceType = result.info.resource_type;
 
-        // Guardar en la base de datos Firestore
+        // Guardar documento asignando el usuario que subió la foto
         db.collection('media').add({
           url: mediaUrl,
           type: resourceType,
+          uploadedBy: currentUser.email,
+          userId: currentUser.uid,
           createdAt: new Date()
         }).then(() => {
-          console.log("Imagen guardada exitosamente en Firestore");
+          console.log("Imagen subida a la galería compartida");
         }).catch(err => {
           console.error("Error al guardar en Firestore:", err);
         });
