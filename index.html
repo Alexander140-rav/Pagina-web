@@ -124,10 +124,49 @@
       object-fit: cover;
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .gallery-item img:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
     }
 
     .hidden {
       display: none !important;
+    }
+
+    /* Modal / Zoom de Imágenes */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      object-fit: contain;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 20px;
+      right: 35px;
+      color: #fff;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
     }
   </style>
 
@@ -167,16 +206,22 @@
 
     <div class="gallery-grid" id="gallery-grid">
       <!-- Fotos fijas locales de tu carpeta -->
-      <div class="gallery-item"><img src="imagenes/28838659.jpg" alt="Foto"></div>
-      <div class="gallery-item"><img src="imagenes/images (1).jpg" alt="Foto"></div>
-      <div class="gallery-item"><img src="imagenes/images (2).jpg" alt="Foto"></div>
-      <div class="gallery-item"><img src="imagenes/images (3).jpg" alt="Foto"></div>
-      <div class="gallery-item"><img src="imagenes/images (4).jpg" alt="Foto"></div>
-      <div class="gallery-item"><img src="imagenes/images.jpg" alt="Foto"></div>
-      <div class="gallery-item"><img src="imagenes/Priscilla Lopez 2.jpeg" alt="Foto"></div>
-      <div class="gallery-item"><img src="imagenes/priscilla-lopez_01.jpg" alt="Foto"></div>
-      <div class="gallery-item"><img src="imagenes/Priscillalopezm.jpg" alt="Foto"></div>
+      <div class="gallery-item"><img src="imagenes/28838659.jpg" alt="Foto" onclick="openZoom(this.src)"></div>
+      <div class="gallery-item"><img src="imagenes/images (1).jpg" alt="Foto" onclick="openZoom(this.src)"></div>
+      <div class="gallery-item"><img src="imagenes/images (2).jpg" alt="Foto" onclick="openZoom(this.src)"></div>
+      <div class="gallery-item"><img src="imagenes/images (3).jpg" alt="Foto" onclick="openZoom(this.src)"></div>
+      <div class="gallery-item"><img src="imagenes/images (4).jpg" alt="Foto" onclick="openZoom(this.src)"></div>
+      <div class="gallery-item"><img src="imagenes/images.jpg" alt="Foto" onclick="openZoom(this.src)"></div>
+      <div class="gallery-item"><img src="imagenes/Priscilla Lopez 2.jpeg" alt="Foto" onclick="openZoom(this.src)"></div>
+      <div class="gallery-item"><img src="imagenes/priscilla-lopez_01.jpg" alt="Foto" onclick="openZoom(this.src)"></div>
+      <div class="gallery-item"><img src="imagenes/Priscillalopezm.jpg" alt="Foto" onclick="openZoom(this.src)"></div>
     </div>
+  </div>
+
+  <!-- Modal para Zoom de fotos -->
+  <div id="image-modal" class="modal" onclick="closeZoom()">
+    <span class="close-modal">&times;</span>
+    <img class="modal-content" id="modal-img">
   </div>
 
   <script>
@@ -230,7 +275,7 @@
       auth.signOut();
     }
 
-    // Cargar fotos guardadas en Firestore (sin filtros complejos para evitar errores de índice)
+    // Cargar fotos guardadas en Firestore
     function loadSavedMedia() {
       db.collection('media').onSnapshot(snapshot => {
         snapshot.docChanges().forEach(change => {
@@ -242,7 +287,7 @@
             if (data.type === 'video') {
               item.innerHTML = `<video src="${data.url}" controls></video>`;
             } else {
-              item.innerHTML = `<img src="${data.url}" alt="Media">`;
+              item.innerHTML = `<img src="${data.url}" alt="Media" onclick="openZoom('${data.url}')">`;
             }
             grid.prepend(item);
           }
@@ -265,6 +310,18 @@
         userEmailSpan.innerText = "";
       }
     });
+
+    // Funciones de Zoom (Modal)
+    function openZoom(src) {
+      const modal = document.getElementById('image-modal');
+      const modalImg = document.getElementById('modal-img');
+      modal.style.display = "flex";
+      modalImg.src = src;
+    }
+
+    function closeZoom() {
+      document.getElementById('image-modal').style.display = "none";
+    }
 
     // Widget de Cloudinary + Guardado inmediato
     const myWidget = cloudinary.createUploadWidget({
