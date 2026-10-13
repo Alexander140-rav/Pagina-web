@@ -131,9 +131,10 @@
     }
   </style>
 
-  <!-- Firebase Compat SDK v10.12.0 -->
+  <!-- Firebase SDKs (Auth + Firestore) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
   <!-- Cloudinary Widget -->
   <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
@@ -165,7 +166,16 @@
     </div>
 
     <div class="gallery-grid" id="gallery-grid">
-      <!-- Los archivos subidos aparecerán aquí -->
+      <!-- Fotos fijas locales de tu carpeta -->
+      <div class="gallery-item"><img src="imagenes/28838659.jpg" alt="Foto"></div>
+      <div class="gallery-item"><img src="imagenes/images (1).jpg" alt="Foto"></div>
+      <div class="gallery-item"><img src="imagenes/images (2).jpg" alt="Foto"></div>
+      <div class="gallery-item"><img src="imagenes/images (3).jpg" alt="Foto"></div>
+      <div class="gallery-item"><img src="imagenes/images (4).jpg" alt="Foto"></div>
+      <div class="gallery-item"><img src="imagenes/images.jpg" alt="Foto"></div>
+      <div class="gallery-item"><img src="imagenes/Priscilla Lopez 2.jpeg" alt="Foto"></div>
+      <div class="gallery-item"><img src="imagenes/priscilla-lopez_01.jpg" alt="Foto"></div>
+      <div class="gallery-item"><img src="imagenes/Priscillalopezm.jpg" alt="Foto"></div>
     </div>
   </div>
 
@@ -180,14 +190,16 @@
       appId: "1:1083437158932:web:1a2b3c4d5e6f"
     };
 
-    // Inicializar Firebase
+    // Inicializar Firebase y Firestore
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
+    const db = firebase.firestore();
 
     const authBox = document.getElementById('auth-box');
     const galleryBox = document.getElementById('gallery-box');
     const userEmailSpan = document.getElementById('user-email');
     const errorMessage = document.getElementById('error-message');
+    const grid = document.getElementById('gallery-grid');
 
     // Registrar usuario
     function register() {
@@ -218,12 +230,33 @@
       auth.signOut();
     }
 
+    // Cargar fotos guardadas en Firestore
+    function loadSavedMedia() {
+      db.collection('media').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+        snapshot.docChanges().forEach(change => {
+          if (change.type === 'added') {
+            const data = change.doc.data();
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+
+            if (data.type === 'video') {
+              item.innerHTML = `<video src="${data.url}" controls></video>`;
+            } else {
+              item.innerHTML = `<img src="${data.url}" alt="Media">`;
+            }
+            grid.prepend(item);
+          }
+        });
+      });
+    }
+
     // Escuchar cambios de sesión
     auth.onAuthStateChanged(user => {
       if (user) {
         authBox.classList.add('hidden');
         galleryBox.classList.remove('hidden');
         userEmailSpan.innerText = user.email;
+        loadSavedMedia();
       } else {
         authBox.classList.remove('hidden');
         galleryBox.classList.add('hidden');
@@ -231,23 +264,21 @@
       }
     });
 
-    // Widget de Cloudinary
+    // Widget de Cloudinary + Guardado automático en Firestore
     const myWidget = cloudinary.createUploadWidget({
       cloudName: 'ox4v1r1w', 
       uploadPreset: 'ml_default'
     }, (error, result) => { 
       if (!error && result && result.event === "success") { 
         const mediaUrl = result.info.secure_url;
-        const grid = document.getElementById('gallery-grid');
-        const item = document.createElement('div');
-        item.className = 'gallery-item';
+        const resourceType = result.info.resource_type;
 
-        if (result.info.resource_type === 'video') {
-          item.innerHTML = `<video src="${mediaUrl}" controls></video>`;
-        } else {
-          item.innerHTML = `<img src="${mediaUrl}" alt="Media">`;
-        }
-        grid.prepend(item);
+        // Guardar permanentemente en la base de datos Firestore
+        db.collection('media').add({
+          url: mediaUrl,
+          type: resourceType,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
       }
     });
 
