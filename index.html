@@ -39,6 +39,7 @@
             object-fit: cover;
             border-radius: 14px;
             box-shadow: 0 8px 24px rgb(0 0 0 / 20%);
+            cursor: pointer;
         }
 
         @media (max-width: 800px) {
@@ -52,6 +53,28 @@
                 grid-template-columns: repeat(2, minmax(0, 1fr));
                 gap: 0.75rem;
             }
+        }
+
+        /* Visor de imágenes en pantalla completa */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -70,5 +93,20 @@
             <img src="imagenes/Priscillalopezm.jpg" alt="Foto de galería 9">
         </section>
     </main>
+
+    <!-- Modal para ver la imagen en grande -->
+    <div id="lightbox" class="lightbox" onclick="this.style.display='none'">
+        <img id="lightbox-img" src="" alt="Imagen ampliada">
+    </div>
+
+    <script>
+        // Al tocar/cliquear cualquier imagen de la galería, se abre en pantalla completa
+        document.querySelectorAll('.gallery img').forEach(img => {
+            img.addEventListener('click', () => {
+                document.getElementById('lightbox-img').src = img.src;
+                document.getElementById('lightbox').style.display = 'flex';
+            });
+        });
+    </script>
 </body>
 </html>
