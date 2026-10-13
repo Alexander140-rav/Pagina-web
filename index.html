@@ -87,13 +87,23 @@
     .btn-logout {
       background-color: #dc3545;
       color: white;
-      padding: 8px 14px;
-      font-size: 0.85rem;
-      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      border-radius: 15px;
     }
 
     .btn-logout:hover {
       background-color: #bd2130;
+    }
+
+    .btn-edit-name {
+      background: transparent;
+      border: none;
+      color: #007bff;
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
     }
 
     #error-message {
@@ -142,30 +152,19 @@
     .profile-info {
       display: flex;
       flex-direction: column;
+      gap: 2px;
     }
 
     .profile-email {
       font-weight: bold;
-      font-size: 0.95rem;
+      font-size: 1rem;
       color: #222;
     }
 
-    .profile-badge-tag {
-      font-size: 0.75rem;
-      color: #28a745;
-      font-weight: 600;
+    .profile-actions {
       display: flex;
       align-items: center;
-      gap: 4px;
-    }
-
-    .profile-badge-tag::before {
-      content: "";
-      display: inline-block;
-      width: 7px;
-      height: 7px;
-      background-color: #28a745;
-      border-radius: 50%;
+      gap: 10px;
     }
 
     /* Galería */
@@ -294,9 +293,11 @@
         <div class="profile-avatar" id="user-avatar">U</div>
         <div class="profile-info">
           <span class="profile-email" id="user-email"></span>
-          <span class="profile-badge-tag">Perfil activo</span>
+          <div class="profile-actions">
+            <button class="btn-edit-name" onclick="editDisplayName()">✏️ Cambiar mi nombre</button>
+            <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
+          </div>
         </div>
-        <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
       </div>
 
       <button class="btn-login" id="upload-btn">Subir Imagen/Video</button>
@@ -361,25 +362,37 @@
       errorMessage.innerText = "";
 
       if (!name) {
-        errorMessage.innerText = "Por favor, escribe tu nombre o apodo para registrarte.";
+        errorMessage.innerText = "Por favor, escribe tu nombre o apodo antes de registrarte.";
         return;
       }
 
       auth.createUserWithEmailAndPassword(email, password)
         .then(userCredential => {
-          // Guardar el nombre en el perfil del usuario
           return userCredential.user.updateProfile({
             displayName: name
           });
         })
         .then(() => {
-          // Refrescar el estado de autenticación para aplicar cambios
-          const user = auth.currentUser;
-          updateUserProfileUI(user);
+          updateUserProfileUI(auth.currentUser);
         })
         .catch(error => {
           errorMessage.innerText = "Firebase: " + error.message;
         });
+    }
+
+    // Editar nombre directamente en cualquier momento
+    function editDisplayName() {
+      if (!currentUser) return;
+      const newName = prompt("Ingresa tu Nombre o Apodo:", currentUser.displayName || "");
+      if (newName && newName.trim() !== "") {
+        currentUser.updateProfile({
+          displayName: newName.trim()
+        }).then(() => {
+          updateUserProfileUI(currentUser);
+        }).catch(err => {
+          console.error("Error al actualizar el nombre:", err);
+        });
+      }
     }
 
     // Iniciar Sesión
@@ -399,9 +412,9 @@
       auth.signOut();
     }
 
-    // Función auxiliar para actualizar la interfaz del perfil
+    // Actualizar nombre y avatar en pantalla
     function updateUserProfileUI(user) {
-      const nameToShow = user.displayName || user.email;
+      const nameToShow = (user.displayName && user.displayName.trim() !== "") ? user.displayName : user.email;
       userEmailSpan.innerText = nameToShow;
       userAvatarDiv.innerText = nameToShow.charAt(0).toUpperCase();
     }
