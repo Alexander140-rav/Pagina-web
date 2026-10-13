@@ -25,6 +25,48 @@
       letter-spacing: 2px;
     }
 
+    /* Notificaciones Flotantes (Toasts) */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: #333;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      font-size: 0.9rem;
+      font-weight: bold;
+      pointer-events: auto;
+      animation: slideIn 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast-success { background: #28a745; }
+    .toast-error { background: #dc3545; }
+    .toast-info { background: #007bff; }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .toast.fade-out {
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+
     /* Contenedor de Autenticación */
     .auth-container {
       max-width: 400px;
@@ -113,13 +155,13 @@
       word-break: break-word;
     }
 
-    /* Panel de usuario y tarjeta de perfil */
+    /* Header del Usuario y Contador */
     .user-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       max-width: 1200px;
-      margin: 0 auto 20px auto;
+      margin: 0 auto 15px auto;
       background: white;
       padding: 12px 20px;
       border-radius: 12px;
@@ -167,7 +209,6 @@
       gap: 10px;
     }
 
-    /* Contador en vivo */
     .media-stats {
       background: #f8f9fa;
       border: 1px solid #e2e8f0;
@@ -179,42 +220,152 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
     }
 
     .media-stats strong {
       color: #007bff;
     }
 
-    /* Galería */
+    /* Barra de Filtros y Ordenamiento */
+    .toolbar {
+      max-width: 1200px;
+      margin: 0 auto 20px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: #e2e8f0;
+      color: #4a5568;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.88rem;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      background: #cbd5e1;
+    }
+
+    .filter-btn.active {
+      background: #007bff;
+      color: white;
+    }
+
+    .sort-btn {
+      background: white;
+      color: #333;
+      border: 1px solid #ccc;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* Cuadrícula de Galería y Tarjetas */
     .gallery-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 20px;
       max-width: 1200px;
       margin: 0 auto;
     }
 
-    .gallery-item img, .gallery-item video {
-      width: 100%;
-      height: 300px;
-      object-fit: cover;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      cursor: pointer;
+    .gallery-card {
+      position: relative;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .gallery-item img:hover {
-      transform: scale(1.02);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    .gallery-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+    }
+
+    .gallery-card img, .gallery-card video {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      display: block;
+      cursor: pointer;
+    }
+
+    .card-footer {
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      border-top: 1px solid #f0f0f0;
+      font-size: 0.85rem;
+    }
+
+    .author-tag {
+      font-weight: 600;
+      color: #555;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 120px;
+    }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-icon {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: #666;
+      padding: 4px 6px;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .btn-icon:hover {
+      background: #f0f0f0;
+    }
+
+    .btn-icon.liked {
+      color: #e63946;
+    }
+
+    .btn-delete-card {
+      color: #dc3545;
+    }
+
+    .btn-delete-card:hover {
+      background: #ffe5e5;
     }
 
     .hidden {
       display: none !important;
     }
 
-    /* Modal / Zoom Interactivo con Navegación */
+    /* Modal / Zoom Interactivo y Comentarios */
     .modal {
       display: none;
       position: fixed;
@@ -223,16 +374,25 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.92);
+      background-color: rgba(0, 0, 0, 0.93);
       justify-content: center;
       align-items: center;
       overflow: hidden;
       user-select: none;
     }
 
+    .modal-main {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
     .modal-content {
-      max-width: 85%;
-      max-height: 85%;
+      max-width: 80%;
+      max-height: 80%;
       border-radius: 8px;
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
       object-fit: contain;
@@ -247,12 +407,12 @@
     .close-modal {
       position: absolute;
       top: 20px;
-      right: 30px;
+      right: 25px;
       color: #fff;
-      font-size: 40px;
+      font-size: 38px;
       font-weight: bold;
       cursor: pointer;
-      z-index: 1003;
+      z-index: 1005;
     }
 
     .nav-btn {
@@ -262,16 +422,12 @@
       background: rgba(0, 0, 0, 0.5);
       color: white;
       border: 1px solid rgba(255, 255, 255, 0.3);
-      font-size: 2.2rem;
-      padding: 12px 18px;
+      font-size: 2rem;
+      padding: 10px 16px;
       cursor: pointer;
       border-radius: 50%;
       z-index: 1002;
       transition: background 0.2s, transform 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      line-height: 1;
     }
 
     .nav-btn:hover {
@@ -282,41 +438,126 @@
     .prev-btn { left: 20px; }
     .next-btn { right: 20px; }
 
-    @media (max-width: 600px) {
-      .nav-btn {
-        font-size: 1.6rem;
-        padding: 8px 14px;
-      }
-      .prev-btn { left: 10px; }
-      .next-btn { right: 10px; }
-      .user-header {
-        justify-content: center;
-        text-align: center;
-      }
-    }
-
     .zoom-controls {
       position: absolute;
       bottom: 25px;
       display: flex;
-      gap: 12px;
-      z-index: 1001;
+      gap: 10px;
+      z-index: 1002;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     .zoom-btn {
       background: rgba(255, 255, 255, 0.2);
       color: white;
       border: 1px solid rgba(255, 255, 255, 0.4);
-      padding: 10px 18px;
-      font-size: 1rem;
-      border-radius: 25px;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      border-radius: 20px;
       cursor: pointer;
       backdrop-filter: blur(5px);
-      transition: background 0.2s;
     }
 
     .zoom-btn:hover {
       background: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Drawer / Panel Lateral de Comentarios */
+    .comments-drawer {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 340px;
+      height: 100%;
+      background: #ffffff;
+      z-index: 1004;
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.3);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+
+    .comments-drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      padding: 18px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .drawer-header h3 {
+      font-size: 1.1rem;
+    }
+
+    .close-drawer {
+      background: transparent;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .comments-body {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .comment-item {
+      background: #f8f9fa;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+    }
+
+    .comment-item strong {
+      color: #007bff;
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .comment-item small {
+      color: #888;
+      font-size: 0.72rem;
+      float: right;
+    }
+
+    .drawer-footer {
+      padding: 15px;
+      border-top: 1px solid #eee;
+      display: flex;
+      gap: 8px;
+    }
+
+    .drawer-footer input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .drawer-footer button {
+      padding: 10px 14px;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 650px) {
+      .comments-drawer {
+        width: 100%;
+      }
+      .nav-btn { font-size: 1.5rem; padding: 6px 12px; }
+      .prev-btn { left: 8px; }
+      .next-btn { right: 8px; }
     }
   </style>
 
@@ -329,6 +570,9 @@
   <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
 </head>
 <body>
+
+  <!-- Contenedor de Notificaciones Toast -->
+  <div id="toast-container" class="toast-container"></div>
 
   <h1>CULOS</h1>
 
@@ -345,7 +589,7 @@
     <div id="error-message"></div>
   </div>
 
-  <!-- Panel con Perfil, Contador y Galería -->
+  <!-- Panel de la Galería Privada/Compartida -->
   <div id="gallery-box" class="hidden">
     <div class="user-header">
       <div class="profile-card">
@@ -359,7 +603,6 @@
         </div>
       </div>
 
-      <!-- Contador de archivos en tiempo real -->
       <div class="media-stats">
         <span>📸 <strong id="photo-count">0</strong> Fotos</span>
         <span>•</span>
@@ -369,31 +612,53 @@
       <button class="btn-login" id="upload-btn">Subir Imagen/Video</button>
     </div>
 
-    <div class="gallery-grid" id="gallery-grid">
-      <!-- Fotos fijas locales de la plantilla base -->
-      <div class="gallery-item static-item"><img src="imagenes/28838659.jpg" alt="Foto" onclick="openZoom(this.src)"></div>
-      <div class="gallery-item static-item"><img src="imagenes/images (1).jpg" alt="Foto" onclick="openZoom(this.src)"></div>
-      <div class="gallery-item static-item"><img src="imagenes/images (2).jpg" alt="Foto" onclick="openZoom(this.src)"></div>
-      <div class="gallery-item static-item"><img src="imagenes/images (3).jpg" alt="Foto" onclick="openZoom(this.src)"></div>
-      <div class="gallery-item static-item"><img src="imagenes/images (4).jpg" alt="Foto" onclick="openZoom(this.src)"></div>
-      <div class="gallery-item static-item"><img src="imagenes/images.jpg" alt="Foto" onclick="openZoom(this.src)"></div>
-      <div class="gallery-item static-item"><img src="imagenes/Priscilla Lopez 2.jpeg" alt="Foto" onclick="openZoom(this.src)"></div>
-      <div class="gallery-item static-item"><img src="imagenes/priscilla-lopez_01.jpg" alt="Foto" onclick="openZoom(this.src)"></div>
-      <div class="gallery-item static-item"><img src="imagenes/Priscillalopezm.jpg" alt="Foto" onclick="openZoom(this.src)"></div>
+    <!-- Barra de Herramientas (Filtros y Orden) -->
+    <div class="toolbar">
+      <div class="filter-tabs">
+        <button class="filter-btn active" onclick="setFilter('all', this)">Todas</button>
+        <button class="filter-btn" onclick="setFilter('photo', this)">📸 Fotos</button>
+        <button class="filter-btn" onclick="setFilter('video', this)">🎥 Videos</button>
+        <button class="filter-btn" onclick="setFilter('mine', this)">👤 Mis Subidas</button>
+      </div>
+
+      <button class="sort-btn" id="sort-btn" onclick="toggleSort()">⏱️ Más recientes</button>
     </div>
+
+    <!-- Cuadrícula Principal -->
+    <div class="gallery-grid" id="gallery-grid"></div>
   </div>
 
-  <!-- Modal con Controles de Zoom y Navegación -->
+  <!-- Modal Interactivo con Zoom y Comentarios -->
   <div id="image-modal" class="modal">
     <span class="close-modal" onclick="closeZoom()">&times;</span>
-    <button class="nav-btn prev-btn" onclick="prevImage(event)">❮</button>
-    <img class="modal-content" id="modal-img">
-    <button class="nav-btn next-btn" onclick="nextImage(event)">❯</button>
+    
+    <div class="modal-main">
+      <button class="nav-btn prev-btn" onclick="prevImage(event)">❮</button>
+      <img class="modal-content" id="modal-img">
+      <button class="nav-btn next-btn" onclick="nextImage(event)">❯</button>
 
-    <div class="zoom-controls">
-      <button class="zoom-btn" onclick="zoomIn(event)">🔍 + Zoom</button>
-      <button class="zoom-btn" onclick="zoomOut(event)">🔍 - Reducir</button>
-      <button class="zoom-btn" onclick="resetZoom(event)">🔄 Restablecer</button>
+      <div class="zoom-controls">
+        <button class="zoom-btn" onclick="zoomIn(event)">🔍 + Zoom</button>
+        <button class="zoom-btn" onclick="zoomOut(event)">🔍 - Reducir</button>
+        <button class="zoom-btn" onclick="resetZoom(event)">🔄 Restablecer</button>
+        <button class="zoom-btn" id="modal-like-btn" onclick="toggleModalLike()">❤️ Me gusta</button>
+        <button class="zoom-btn" onclick="toggleCommentsDrawer()">💬 Comentarios</button>
+      </div>
+    </div>
+
+    <!-- Panel Lateral de Comentarios -->
+    <div class="comments-drawer" id="comments-drawer">
+      <div class="drawer-header">
+        <h3>💬 Comentarios</h3>
+        <button class="close-drawer" onclick="toggleCommentsDrawer()">&times;</button>
+      </div>
+      <div class="comments-body" id="comments-list">
+        <!-- Comentarios en tiempo real -->
+      </div>
+      <div class="drawer-footer">
+        <input type="text" id="comment-input" placeholder="Escribe un comentario...">
+        <button class="btn-login" onclick="submitComment()">Enviar</button>
+      </div>
     </div>
   </div>
 
@@ -408,11 +673,11 @@
       appId: "1:1083437158932:web:1a2b3c4d5e6f"
     };
 
-    // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    // Elementos DOM
     const authBox = document.getElementById('auth-box');
     const galleryBox = document.getElementById('gallery-box');
     const userEmailSpan = document.getElementById('user-email');
@@ -422,16 +687,34 @@
 
     let currentUser = null;
     let unsubscribeMedia = null;
+    let unsubscribeComments = null;
 
-    // Actualizar el contador de fotos y videos en tiempo real
-    function updateMediaCounter() {
-      const photos = document.querySelectorAll('#gallery-grid img').length;
-      const videos = document.querySelectorAll('#gallery-grid video').length;
-      document.getElementById('photo-count').innerText = photos;
-      document.getElementById('video-count').innerText = videos;
+    let allMediaItems = [];
+    let activeFilter = 'all';
+    let activeSort = 'newest'; // 'newest' o 'oldest'
+
+    // Fotos de plantilla fijas base
+    const staticLocalFiles = [
+      "imagenes/28838659.jpg", "imagenes/images (1).jpg", "imagenes/images (2).jpg",
+      "imagenes/images (3).jpg", "imagenes/images (4).jpg", "imagenes/images.jpg",
+      "imagenes/Priscilla Lopez 2.jpeg", "imagenes/priscilla-lopez_01.jpg", "imagenes/Priscillalopezm.jpg"
+    ];
+
+    // --- Sistema de Notificaciones Toast ---
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerText = message;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
     }
 
-    // Registrar usuario guardando su Nombre
+    // --- Autenticación ---
     function register() {
       const name = document.getElementById('display-name').value.trim();
       const email = document.getElementById('email').value.trim();
@@ -445,96 +728,192 @@
 
       auth.createUserWithEmailAndPassword(email, password)
         .then(userCredential => {
-          return userCredential.user.updateProfile({
-            displayName: name
-          });
+          return userCredential.user.updateProfile({ displayName: name });
         })
         .then(() => {
           updateUserProfileUI(auth.currentUser);
+          showToast("¡Cuenta creada con éxito!", "success");
         })
-        .catch(error => {
-          errorMessage.innerText = "Firebase: " + error.message;
-        });
+        .catch(error => { errorMessage.innerText = "Firebase: " + error.message; });
     }
 
-    // Editar nombre directamente
     function editDisplayName() {
       if (!currentUser) return;
       const newName = prompt("Ingresa tu Nombre o Apodo:", currentUser.displayName || "");
       if (newName && newName.trim() !== "") {
-        currentUser.updateProfile({
-          displayName: newName.trim()
-        }).then(() => {
+        currentUser.updateProfile({ displayName: newName.trim() }).then(() => {
           updateUserProfileUI(currentUser);
-        }).catch(err => {
-          console.error("Error al actualizar el nombre:", err);
-        });
+          showToast("Nombre actualizado a " + newName.trim(), "success");
+        }).catch(err => showToast("Error al actualizar: " + err.message, "error"));
       }
     }
 
-    // Iniciar Sesión
     function login() {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       errorMessage.innerText = "";
 
       auth.signInWithEmailAndPassword(email, password)
-        .catch(error => {
-          errorMessage.innerText = "Firebase: " + error.message;
-        });
+        .then(() => showToast("Sesión iniciada correctamente", "success"))
+        .catch(error => { errorMessage.innerText = "Firebase: " + error.message; });
     }
 
-    // Cerrar Sesión
     function logout() {
-      auth.signOut();
+      auth.signOut().then(() => showToast("Sesión cerrada", "info"));
     }
 
-    // Actualizar nombre y avatar
     function updateUserProfileUI(user) {
       const nameToShow = (user.displayName && user.displayName.trim() !== "") ? user.displayName : user.email;
       userEmailSpan.innerText = nameToShow;
       userAvatarDiv.innerText = nameToShow.charAt(0).toUpperCase();
     }
 
-    // Cargar fotos subidas en Firestore
+    // --- Carga de datos y Renderizado ---
     function loadSavedMedia() {
-      document.querySelectorAll('.dynamic-item').forEach(el => el.remove());
-
       if (unsubscribeMedia) unsubscribeMedia();
 
       unsubscribeMedia = db.collection('media')
         .onSnapshot(snapshot => {
-          snapshot.docChanges().forEach(change => {
-            if (change.type === 'added') {
-              const data = change.doc.data();
-              const item = document.createElement('div');
-              item.className = 'gallery-item dynamic-item';
-
-              if (data.type === 'video') {
-                item.innerHTML = `<video src="${data.url}" controls></video>`;
-              } else {
-                item.innerHTML = `<img src="${data.url}" alt="Media" onclick="openZoom('${data.url}')">`;
-              }
-              grid.prepend(item);
-            }
+          const dynamicItems = [];
+          snapshot.forEach(doc => {
+            dynamicItems.push({ id: doc.id, ...doc.data() });
           });
-          // Actualizar contador cada vez que haya un cambio
-          updateMediaCounter();
-        }, error => {
-          console.error("Error al obtener imágenes:", error);
-        });
+
+          // Unificar fotos locales fijas + fotos dinámicas de Firestore
+          const staticItemsFormatted = staticLocalFiles.map((url, idx) => ({
+            id: 'static_' + idx,
+            url: url,
+            type: 'image',
+            uploadedBy: 'Sistema',
+            userId: 'system',
+            createdAt: new Date(2026, 0, 1),
+            likes: [],
+            isStatic: true
+          }));
+
+          allMediaItems = [...dynamicItems, ...staticItemsFormatted];
+          renderGallery();
+        }, error => console.error("Error en Firestore:", error));
     }
 
-    // Escuchar cambios de sesión
+    function setFilter(filter, btn) {
+      activeFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderGallery();
+    }
+
+    function toggleSort() {
+      activeSort = activeSort === 'newest' ? 'oldest' : 'newest';
+      document.getElementById('sort-btn').innerText = activeSort === 'newest' ? '⏱️ Más recientes' : '⏱️ Más antiguas';
+      renderGallery();
+    }
+
+    function renderGallery() {
+      grid.innerHTML = '';
+
+      // 1. Filtrado
+      let filtered = allMediaItems.filter(item => {
+        if (activeFilter === 'photo') return item.type !== 'video';
+        if (activeFilter === 'video') return item.type === 'video';
+        if (activeFilter === 'mine') return currentUser && item.userId === currentUser.uid;
+        return true;
+      });
+
+      // 2. Ordenamiento
+      filtered.sort((a, b) => {
+        const timeA = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt).getTime()) : 0;
+        const timeB = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt).getTime()) : 0;
+        return activeSort === 'newest' ? timeB - timeA : timeA - timeB;
+      });
+
+      // 3. Renderizar Tarjetas
+      filtered.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'gallery-card';
+
+        const likes = item.likes || [];
+        const isLiked = currentUser && likes.includes(currentUser.uid);
+        const canDelete = currentUser && (item.userId === currentUser.uid);
+
+        let mediaElement = '';
+        if (item.type === 'video') {
+          mediaElement = `<video src="${item.url}" controls></video>`;
+        } else {
+          mediaElement = `<img src="${item.url}" alt="Media" onclick="openZoom('${item.id}')">`;
+        }
+
+        const deleteButtonHtml = canDelete ? 
+          `<button class="btn-icon btn-delete-card" onclick="deleteMedia('${item.id}', event)" title="Eliminar">🗑️</button>` : '';
+
+        card.innerHTML = `
+          ${mediaElement}
+          <div class="card-footer">
+            <span class="author-tag">👤 ${escapeHtml(item.uploadedBy || 'Anónimo')}</span>
+            <div class="card-actions">
+              <button class="btn-icon ${isLiked ? 'liked' : ''}" onclick="toggleLike('${item.id}', event)">
+                ${isLiked ? '❤️' : '🤍'} <span>${likes.length}</span>
+              </button>
+              ${deleteButtonHtml}
+            </div>
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+
+      // Actualizar Contador Global
+      const totalPhotos = allMediaItems.filter(i => i.type !== 'video').length;
+      const totalVideos = allMediaItems.filter(i => i.type === 'video').length;
+      document.getElementById('photo-count').innerText = totalPhotos;
+      document.getElementById('video-count').innerText = totalVideos;
+    }
+
+    // --- Dar / Quitar Like ---
+    function toggleLike(id, e) {
+      if (e) e.stopPropagation();
+      if (!currentUser) return;
+
+      const item = allMediaItems.find(i => i.id === id);
+      if (!item || item.isStatic) {
+        showToast("Elemento local fijo no modificable", "info");
+        return;
+      }
+
+      const mediaRef = db.collection('media').doc(id);
+      const likes = item.likes || [];
+      const hasLiked = likes.includes(currentUser.uid);
+
+      if (hasLiked) {
+        mediaRef.update({ likes: firebase.firestore.FieldValue.arrayRemove(currentUser.uid) });
+        showToast("Le quitaste Me gusta", "info");
+      } else {
+        mediaRef.update({ likes: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) });
+        showToast("¡Te gusta esta publicación! ❤️", "success");
+      }
+    }
+
+    // --- Eliminar Publicación ---
+    function deleteMedia(id, e) {
+      if (e) e.stopPropagation();
+      if (!currentUser) return;
+
+      if (confirm("¿Seguro que quieres eliminar esta publicación permanentemente?")) {
+        db.collection('media').doc(id).delete().then(() => {
+          showToast("Publicación eliminada correctamente 🗑️", "success");
+          if (modal.style.display === "flex") closeZoom();
+        }).catch(err => showToast("Error al eliminar: " + err.message, "error"));
+      }
+    }
+
+    // Escuchar Estado de Sesión
     auth.onAuthStateChanged(user => {
       if (user) {
         currentUser = user;
         authBox.classList.add('hidden');
         galleryBox.classList.remove('hidden');
-        
         updateUserProfileUI(user);
         loadSavedMedia();
-        updateMediaCounter();
       } else {
         currentUser = null;
         if (unsubscribeMedia) unsubscribeMedia();
@@ -542,61 +921,132 @@
         galleryBox.classList.add('hidden');
         userEmailSpan.innerText = "";
         userAvatarDiv.innerText = "";
-        document.querySelectorAll('.dynamic-item').forEach(el => el.remove());
+        grid.innerHTML = "";
       }
     });
 
-    // --- Lógica de Zoom y Navegación ---
+    // --- Modal, Zoom, Navegación y Comentarios ---
     let currentScale = 1;
     let isDragging = false;
     let startX = 0, startY = 0;
     let translateX = 0, translateY = 0;
 
-    let galleryImages = [];
+    let currentModalMediaId = null;
     let currentImageIndex = 0;
 
     const modal = document.getElementById('image-modal');
     const modalImg = document.getElementById('modal-img');
+    const commentsDrawer = document.getElementById('comments-drawer');
 
-    function updateGalleryImageList() {
-      const imgs = Array.from(document.querySelectorAll('#gallery-grid .gallery-item img'));
-      galleryImages = imgs.map(img => img.src);
-    }
+    function openZoom(id) {
+      const item = allMediaItems.find(i => i.id === id);
+      if (!item) return;
 
-    function openZoom(src) {
-      updateGalleryImageList();
-      currentImageIndex = galleryImages.indexOf(src);
-      if (currentImageIndex === -1) {
-        galleryImages.push(src);
-        currentImageIndex = galleryImages.length - 1;
-      }
+      currentModalMediaId = id;
+      currentImageIndex = allMediaItems.findIndex(i => i.id === id);
 
       modal.style.display = "flex";
-      modalImg.src = galleryImages[currentImageIndex];
+      modalImg.src = item.url;
+
+      updateModalLikeBtn();
       resetZoomState();
+      loadComments(id);
     }
 
     function closeZoom() {
       modal.style.display = "none";
+      commentsDrawer.classList.remove('open');
+      if (unsubscribeComments) unsubscribeComments();
       resetZoomState();
     }
 
     function prevImage(e) {
       if (e) e.stopPropagation();
-      if (galleryImages.length <= 1) return;
-      currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
-      modalImg.src = galleryImages[currentImageIndex];
-      resetZoomState();
+      if (allMediaItems.length <= 1) return;
+      currentImageIndex = (currentImageIndex - 1 + allMediaItems.length) % allMediaItems.length;
+      openZoom(allMediaItems[currentImageIndex].id);
     }
 
     function nextImage(e) {
       if (e) e.stopPropagation();
-      if (galleryImages.length <= 1) return;
-      currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
-      modalImg.src = galleryImages[currentImageIndex];
-      resetZoomState();
+      if (allMediaItems.length <= 1) return;
+      currentImageIndex = (currentImageIndex + 1) % allMediaItems.length;
+      openZoom(allMediaItems[currentImageIndex].id);
     }
 
+    function updateModalLikeBtn() {
+      const item = allMediaItems.find(i => i.id === currentModalMediaId);
+      const btn = document.getElementById('modal-like-btn');
+      if (!item) return;
+
+      const likes = item.likes || [];
+      const isLiked = currentUser && likes.includes(currentUser.uid);
+      btn.innerText = `${isLiked ? '❤️' : '🤍'} Me gusta (${likes.length})`;
+    }
+
+    function toggleModalLike() {
+      if (currentModalMediaId) {
+        toggleLike(currentModalMediaId);
+        setTimeout(updateModalLikeBtn, 300);
+      }
+    }
+
+    // --- Comentarios en Tiempo Real ---
+    function toggleCommentsDrawer() {
+      commentsDrawer.classList.toggle('open');
+    }
+
+    function loadComments(mediaId) {
+      const list = document.getElementById('comments-list');
+      list.innerHTML = '<p style="color:#888;">Cargando comentarios...</p>';
+
+      if (unsubscribeComments) unsubscribeComments();
+
+      if (mediaId.startsWith('static_')) {
+        list.innerHTML = '<p style="color:#888;">Los comentarios no están disponibles para archivos base locales.</p>';
+        return;
+      }
+
+      unsubscribeComments = db.collection('media').doc(mediaId).collection('comments')
+        .orderBy('createdAt', 'asc')
+        .onSnapshot(snapshot => {
+          list.innerHTML = '';
+          if (snapshot.empty) {
+            list.innerHTML = '<p style="color:#888;">Sin comentarios aún. ¡Sé el primero!</p>';
+            return;
+          }
+
+          snapshot.forEach(doc => {
+            const c = doc.data();
+            const div = document.createElement('div');
+            div.className = 'comment-item';
+            const timeStr = c.createdAt ? new Date(c.createdAt.toDate()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+            div.innerHTML = `<small>${timeStr}</small><strong>${escapeHtml(c.userName)}</strong><span>${escapeHtml(c.text)}</span>`;
+            list.appendChild(div);
+          });
+          list.scrollTop = list.scrollHeight;
+        });
+    }
+
+    function submitComment() {
+      const input = document.getElementById('comment-input');
+      const text = input.value.trim();
+      if (!text || !currentModalMediaId || currentModalMediaId.startsWith('static_')) return;
+
+      const name = currentUser.displayName || currentUser.email;
+
+      db.collection('media').doc(currentModalMediaId).collection('comments').add({
+        userId: currentUser.uid,
+        userName: name,
+        text: text,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        input.value = '';
+        showToast("Comentario enviado 💬", "success");
+      }).catch(err => showToast("Error al comentar: " + err.message, "error"));
+    }
+
+    // --- Zoom y Arrastre ---
     function resetZoomState() {
       currentScale = 1;
       translateX = 0;
@@ -617,10 +1067,7 @@
     function zoomOut(e) {
       if (e) e.stopPropagation();
       currentScale = Math.max(currentScale - 0.5, 1);
-      if (currentScale === 1) {
-        translateX = 0;
-        translateY = 0;
-      }
+      if (currentScale === 1) { translateX = 0; translateY = 0; }
       updateTransform();
     }
 
@@ -637,41 +1084,12 @@
       }
     });
 
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    modal.addEventListener('touchstart', (e) => {
-      if (currentScale === 1) {
-        touchStartX = e.changedTouches[0].screenX;
-      }
-    }, { passive: true });
-
-    modal.addEventListener('touchend', (e) => {
-      if (currentScale === 1) {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-      }
-    }, { passive: true });
-
-    function handleSwipe() {
-      const swipeThreshold = 50;
-      if (touchEndX < touchStartX - swipeThreshold) {
-        nextImage();
-      } else if (touchEndX > touchStartX + swipeThreshold) {
-        prevImage();
-      }
-    }
-
     modal.addEventListener('wheel', (e) => {
       e.preventDefault();
-      if (e.deltaY < 0) {
-        currentScale = Math.min(currentScale + 0.2, 5);
-      } else {
+      if (e.deltaY < 0) currentScale = Math.min(currentScale + 0.2, 5);
+      else {
         currentScale = Math.max(currentScale - 0.2, 1);
-        if (currentScale === 1) {
-          translateX = 0;
-          translateY = 0;
-        }
+        if (currentScale === 1) { translateX = 0; translateY = 0; }
       }
       updateTransform();
     }, { passive: false });
@@ -692,17 +1110,9 @@
       }
     });
 
-    window.addEventListener('mouseup', () => {
-      isDragging = false;
-    });
+    window.addEventListener('mouseup', () => { isDragging = false; });
 
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        closeZoom();
-      }
-    });
-
-    // Widget de Cloudinary
+    // Cloudinary Widget
     const myWidget = cloudinary.createUploadWidget({
       cloudName: 'ox4v1r1w', 
       uploadPreset: 'oemolwiq'
@@ -718,18 +1128,21 @@
           type: resourceType,
           uploadedBy: currentUser.displayName || currentUser.email,
           userId: currentUser.uid,
-          createdAt: new Date()
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          likes: []
         }).then(() => {
-          console.log("Imagen guardada exitosamente en Firestore");
-        }).catch(err => {
-          console.error("Error al guardar en Firestore:", err);
-        });
+          showToast("¡Archivo subido exitosamente! 🎉", "success");
+        }).catch(err => showToast("Error al guardar: " + err.message, "error"));
       }
     });
 
-    document.getElementById("upload-btn").addEventListener("click", function(){
-      myWidget.open();
-    }, false);
+    document.getElementById("upload-btn").addEventListener("click", () => myWidget.open(), false);
+
+    // Escape de HTML seguro
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
   </script>
 </body>
 </html>
