@@ -1,347 +1,259 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Saca los culos</title>
-    <style>
-        body {
-            min-height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            color: #222;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galería Privada</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
 
-        main {
-            width: min(1100px, calc(100% - 2rem));
-            margin: 0 auto;
-            padding: 2rem 0;
-            text-align: center;
-        }
+    body {
+      background-color: #f4f4f9;
+      color: #333;
+      padding: 20px;
+    }
 
-        h1 {
-            margin: 0 0 1.5rem;
-            font-size: 1.5rem;
-            font-weight: 500;
-        }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 2rem;
+      letter-spacing: 2px;
+    }
 
-        /* Secciones de Autenticación y Subida */
-        .auth-container, .upload-container {
-            background: #ffffff;
-            padding: 1.5rem;
-            border-radius: 14px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-        }
+    /* Contenedor de Autenticación */
+    .auth-container {
+      max-width: 400px;
+      margin: 30px auto;
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
 
-        input[type="email"], input[type="password"], input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-sizing: border-box;
-        }
+    .auth-container h2 {
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
 
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            margin: 5px 2px;
-            transition: background 0.2s;
-        }
+    .auth-container input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
 
-        button:hover {
-            background-color: #0056b3;
-        }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
 
-        .user-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #fff;
-            padding: 10px 20px;
-            border-radius: 10px;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
 
-        /* Cuadrícula de la galería */
-        .gallery {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 1rem;
-        }
+    .btn-login {
+      background-color: #007bff;
+      color: white;
+    }
 
-        .gallery img, .gallery video {
-            display: block;
-            width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
-            border-radius: 14px;
-            box-shadow: 0 8px 24px rgb(0 0 0 / 20%);
-            cursor: pointer;
-            background: #000;
-        }
+    .btn-login:hover {
+      background-color: #0056b3;
+    }
 
-        @media (max-width: 800px) {
-            .gallery {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-            }
-        }
+    .btn-register {
+      background-color: #28a745;
+      color: white;
+    }
 
-        @media (max-width: 560px) {
-            .gallery {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 0.75rem;
-            }
-        }
+    .btn-register:hover {
+      background-color: #1e7e34;
+    }
 
-        /* Visor de imágenes y videos en pantalla completa */
-        .lightbox {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            overflow: auto;
-        }
+    .btn-logout {
+      background-color: #dc3545;
+      color: white;
+      margin-left: 10px;
+    }
 
-        .lightbox img, .lightbox video {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
-            border-radius: 10px;
-            transition: transform 0.3s ease;
-            cursor: zoom-in;
-            touch-action: pinch-zoom;
-        }
+    #error-message {
+      color: #d9534f;
+      margin-top: 15px;
+      font-size: 0.9rem;
+      word-break: break-word;
+    }
 
-        .lightbox img.zoomed {
-            transform: scale(2);
-            cursor: zoom-out;
-        }
+    /* Panel de usuario y galería */
+    .user-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto 20px auto;
+      background: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
 
-        .hidden {
-            display: none !important;
-        }
-    </style>
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .gallery-item img, .gallery-item video {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+
+  <!-- Firebase Compat SDK v10.12.0 -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+  <!-- Cloudinary Widget -->
+  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
 </head>
 <body>
-    <main>
-        <h1>CULOS</h1>
 
-        <!-- Header del usuario autenticado -->
-        <div id="user-info" class="user-header hidden">
-            <span id="user-email" style="font-weight: bold;"></span>
-            <button id="logout-btn" style="background-color: #dc3545;">Cerrar Sesión</button>
-        </div>
+  <h1>CULOS</h1>
 
-        <!-- Formulario de Iniciar Sesión / Registro -->
-        <div id="auth-section" class="auth-container">
-            <h2 style="margin-top:0;">Acceso a la Galería</h2>
-            <input type="email" id="auth-email" placeholder="Correo electrónico">
-            <input type="password" id="auth-password" placeholder="Contraseña">
-            <div>
-                <button id="login-btn">Iniciar Sesión</button>
-                <button id="register-btn" style="background-color: #28a745;">Registrarse</button>
-            </div>
-            <p id="auth-error" style="color: #dc3545; font-size: 0.9rem; margin-bottom: 0;"></p>
-        </div>
+  <!-- Formulario de Autenticación -->
+  <div id="auth-box" class="auth-container">
+    <h2>Acceso a la Galería</h2>
+    <input type="email" id="email" placeholder="Correo electrónico" required>
+    <input type="password" id="password" placeholder="Contraseña" required>
+    <div class="btn-group">
+      <button class="btn-login" onclick="login()">Iniciar Sesión</button>
+      <button class="btn-register" onclick="register()">Registrarse</button>
+    </div>
+    <div id="error-message"></div>
+  </div>
 
-        <!-- Sección de subida a Cloudinary -->
-        <div id="upload-section" class="upload-container hidden">
-            <h2 style="margin-top:0;">Subir Foto o Video</h2>
-            <input type="file" id="file-input" accept="image/*,video/*">
-            <button id="upload-btn">Subir Archivo</button>
-            <p id="upload-status" style="font-size: 0.9rem; margin-bottom:0;"></p>
-        </div>
-
-        <!-- Galería de imágenes -->
-        <section id="gallery" class="gallery" aria-label="Galería de imágenes">
-            <img src="imagenes/28838659.jpg" alt="Foto de galería 1">
-            <img src="imagenes/images (1).jpg" alt="Foto de galería 2">
-            <img src="imagenes/images (2).jpg" alt="Foto de galería 3">
-            <img src="imagenes/images (3).jpg" alt="Foto de galería 4">
-            <img src="imagenes/images.jpg" alt="Foto de galería 5">
-            <img src="imagenes/images (4).jpg" alt="Foto de galería 6">
-            <img src="imagenes/Priscilla Lopez 2.jpeg" alt="Foto de galería 7">
-            <img src="imagenes/priscilla-lopez_01.jpg" alt="Foto de galería 8">
-            <img src="imagenes/Priscillalopezm.jpg" alt="Foto de galería 9">
-        </section>
-    </main>
-
-    <!-- Modal para ver imágenes/videos en grande -->
-    <div id="lightbox" class="lightbox">
-        <div id="lightbox-content"></div>
+  <!-- Panel de la Galería Privada -->
+  <div id="gallery-box" class="hidden">
+    <div class="user-header">
+      <div>
+        <span>Conectado como: <strong id="user-email"></strong></span>
+        <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
+      </div>
+      <button class="btn-login" id="upload-btn">Subir Imagen/Video</button>
     </div>
 
-    <!-- Firebase y Cloudinary Integration -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    <div class="gallery-grid" id="gallery-grid">
+      <!-- Los archivos subidos aparecerán aquí -->
+    </div>
+  </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBnq4z7akcZA2o6FGcISNidtFB5eybZBAQ",
-            authDomain: "galeria-amigos123.firebaseapp.com",
-            projectId: "galeria-amigos123",
-            storageBucket: "galeria-amigos123.firebasestorage.app",
-            messagingSenderId: "1045625752676",
-            appId: "1:1045625752676:web:41313b7aa3b1effe002371"
-        };
+  <script>
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyBnq4z7akcZA2o6FGCiSNIdtFB5eybZBAQ",
+      authDomain: "galeria-amigos123.firebaseapp.com",
+      projectId: "galeria-amigos123",
+      storageBucket: "galeria-amigos123.appspot.com",
+      messagingSenderId: "1083437158932",
+      appId: "1:1083437158932:web:1a2b3c4d5e6f"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
 
-        const CLOUDINARY_CLOUD_NAME = "ox4v1r1w";
-        const CLOUDINARY_UPLOAD_PRESET = "oemolwiq";
+    const authBox = document.getElementById('auth-box');
+    const galleryBox = document.getElementById('gallery-box');
+    const userEmailSpan = document.getElementById('user-email');
+    const errorMessage = document.getElementById('error-message');
 
-        const authSection = document.getElementById('auth-section');
-        const uploadSection = document.getElementById('upload-section');
-        const userInfo = document.getElementById('user-info');
-        const userEmailSpan = document.getElementById('user-email');
-        const authError = document.getElementById('auth-error');
-        const uploadStatus = document.getElementById('upload-status');
-        const gallery = document.getElementById('gallery');
+    // Registrar usuario
+    function register() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      errorMessage.innerText = "";
 
-        // Estado de la sesión
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                authSection.classList.add('hidden');
-                uploadSection.classList.remove('hidden');
-                userInfo.classList.remove('hidden');
-                userEmailSpan.textContent = user.email;
-            } else {
-                authSection.classList.remove('hidden');
-                uploadSection.classList.add('hidden');
-                userInfo.classList.add('hidden');
-            }
+      auth.createUserWithEmailAndPassword(email, password)
+        .catch(error => {
+          errorMessage.innerText = "Firebase: " + error.message;
         });
+    }
 
-        // Eventos Auth
-        document.getElementById('register-btn').addEventListener('click', async () => {
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-            authError.textContent = '';
-            try {
-                await createUserWithEmailAndPassword(auth, email, password);
-            } catch (err) {
-                authError.textContent = err.message;
-            }
+    // Iniciar Sesión
+    function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      errorMessage.innerText = "";
+
+      auth.signInWithEmailAndPassword(email, password)
+        .catch(error => {
+          errorMessage.innerText = "Firebase: " + error.message;
         });
+    }
 
-        document.getElementById('login-btn').addEventListener('click', async () => {
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-            authError.textContent = '';
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-            } catch (err) {
-                authError.textContent = err.message;
-            }
-        });
+    // Cerrar Sesión
+    function logout() {
+      auth.signOut();
+    }
 
-        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+    // Escuchar cambios de sesión
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        authBox.classList.add('hidden');
+        galleryBox.classList.remove('hidden');
+        userEmailSpan.innerText = user.email;
+      } else {
+        authBox.classList.remove('hidden');
+        galleryBox.classList.add('hidden');
+        userEmailSpan.innerText = "";
+      }
+    });
 
-        // Subida a Cloudinary
-        document.getElementById('upload-btn').addEventListener('click', async () => {
-            const fileInput = document.getElementById('file-input');
-            const file = fileInput.files[0];
-            if (!file) {
-                uploadStatus.textContent = 'Selecciona un archivo primero.';
-                return;
-            }
+    // Widget de Cloudinary
+    const myWidget = cloudinary.createUploadWidget({
+      cloudName: 'ox4v1r1w', 
+      uploadPreset: 'ml_default'
+    }, (error, result) => { 
+      if (!error && result && result.event === "success") { 
+        const mediaUrl = result.info.secure_url;
+        const grid = document.getElementById('gallery-grid');
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
 
-            uploadStatus.textContent = 'Subiendo a la nube... ⏳';
-
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-
-            const resourceType = file.type.startsWith('video') ? 'video' : 'image';
-
-            try {
-                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await res.json();
-                if (data.secure_url) {
-                    uploadStatus.textContent = '¡Subido con éxito! 🎉';
-                    addMediaToGallery(data.secure_url, resourceType);
-                    fileInput.value = '';
-                } else {
-                    uploadStatus.textContent = 'Error al subir: ' + (data.error?.message || 'Desconocido');
-                }
-            } catch (err) {
-                uploadStatus.textContent = 'Error de conexión al subir.';
-            }
-        });
-
-        function addMediaToGallery(url, type) {
-            let elem;
-            if (type === 'video') {
-                elem = document.createElement('video');
-                elem.src = url;
-                elem.muted = true;
-                elem.addEventListener('click', () => openLightbox(url, 'video'));
-            } else {
-                elem = document.createElement('img');
-                elem.src = url;
-                elem.alt = "Nueva foto";
-                elem.addEventListener('click', () => openLightbox(url, 'image'));
-            }
-            gallery.prepend(elem);
+        if (result.info.resource_type === 'video') {
+          item.innerHTML = `<video src="${mediaUrl}" controls></video>`;
+        } else {
+          item.innerHTML = `<img src="${mediaUrl}" alt="Media">`;
         }
+        grid.prepend(item);
+      }
+    });
 
-        // Visor Lightbox con Zoom
-        const lightbox = document.getElementById('lightbox');
-        const lightboxContent = document.getElementById('lightbox-content');
-
-        function openLightbox(url, type) {
-            lightboxContent.innerHTML = '';
-            if (type === 'video') {
-                const vid = document.createElement('video');
-                vid.src = url;
-                vid.controls = true;
-                vid.autoplay = true;
-                vid.addEventListener('click', (e) => e.stopPropagation());
-                lightboxContent.appendChild(vid);
-            } else {
-                const img = document.createElement('img');
-                img.src = url;
-                img.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    img.classList.toggle('zoomed');
-                });
-                lightboxContent.appendChild(img);
-            }
-            lightbox.style.display = 'flex';
-        }
-
-        // Asociar eventos Lightbox a las imágenes locales iniciales
-        document.querySelectorAll('.gallery img').forEach(img => {
-            img.addEventListener('click', () => openLightbox(img.src, 'image'));
-        });
-
-        lightbox.addEventListener('click', () => {
-            lightbox.style.display = 'none';
-            lightboxContent.innerHTML = '';
-        });
-    </script>
+    document.getElementById("upload-btn").addEventListener("click", function(){
+      myWidget.open();
+    }, false);
+  </script>
 </body>
 </html>
