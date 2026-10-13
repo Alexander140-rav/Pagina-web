@@ -137,7 +137,7 @@
       display: none !important;
     }
 
-    /* Modal / Zoom de Imágenes */
+    /* Modal / Zoom Interactivo de Imágenes */
     .modal {
       display: none;
       position: fixed;
@@ -146,27 +146,60 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.9);
+      background-color: rgba(0, 0, 0, 0.92);
       justify-content: center;
       align-items: center;
+      overflow: hidden;
+      user-select: none;
     }
 
     .modal-content {
-      max-width: 90%;
-      max-height: 90%;
+      max-width: 85%;
+      max-height: 85%;
       border-radius: 8px;
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
       object-fit: contain;
+      transition: transform 0.1s ease-out;
+      cursor: grab;
+    }
+
+    .modal-content:active {
+      cursor: grabbing;
     }
 
     .close-modal {
       position: absolute;
       top: 20px;
-      right: 35px;
+      right: 30px;
       color: #fff;
       font-size: 40px;
       font-weight: bold;
       cursor: pointer;
+      z-index: 1001;
+    }
+
+    .zoom-controls {
+      position: absolute;
+      bottom: 25px;
+      display: flex;
+      gap: 12px;
+      z-index: 1001;
+    }
+
+    .zoom-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      padding: 10px 18px;
+      font-size: 1rem;
+      border-radius: 25px;
+      cursor: pointer;
+      backdrop-filter: blur(5px);
+      transition: background 0.2s;
+    }
+
+    .zoom-btn:hover {
+      background: rgba(255, 255, 255, 0.4);
     }
   </style>
 
@@ -218,4 +251,224 @@
     </div>
   </div>
 
-  <!-- Modal para Zoom de fotos -->
+  <!-- Modal con Controles de Zoom -->
+  <div id="image-modal" class="modal">
+    <span class="close-modal" onclick="closeZoom()">&times;</span>
+    <img class="modal-content" id="modal-img">
+    <div class="zoom-controls">
+      <button class="zoom-btn" onclick="zoomIn(event)">🔍 + Zoom</button>
+      <button class="zoom-btn" onclick="zoomOut(event)">🔍 - Reducir</button>
+      <button class="zoom-btn" onclick="resetZoom(event)">🔄 Restablecer</button>
+    </div>
+  </div>
+
+  <script>
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyBnq4z7akcZA2o6FGCiSNIdtFB5eybZBAQ",
+      authDomain: "galeria-amigos123.firebaseapp.com",
+      projectId: "galeria-amigos123",
+      storageBucket: "galeria-amigos123.appspot.com",
+      messagingSenderId: "1083437158932",
+      appId: "1:1083437158932:web:1a2b3c4d5e6f"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const authBox = document.getElementById('auth-box');
+    const galleryBox = document.getElementById('gallery-box');
+    const userEmailSpan = document.getElementById('user-email');
+    const errorMessage = document.getElementById('error-message');
+    const grid = document.getElementById('gallery-grid');
+
+    // Registrar usuario
+    function register() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      errorMessage.innerText = "";
+
+      auth.createUserWithEmailAndPassword(email, password)
+        .catch(error => {
+          errorMessage.innerText = "Firebase: " + error.message;
+        });
+    }
+
+    // Iniciar Sesión
+    function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      errorMessage.innerText = "";
+
+      auth.signInWithEmailAndPassword(email, password)
+        .catch(error => {
+          errorMessage.innerText = "Firebase: " + error.message;
+        });
+    }
+
+    // Cerrar Sesión
+    function logout() {
+      auth.signOut();
+    }
+
+    // Cargar fotos guardadas en Firestore
+    function loadSavedMedia() {
+      db.collection('media').onSnapshot(snapshot => {
+        snapshot.docChanges().forEach(change => {
+          if (change.type === 'added') {
+            const data = change.doc.data();
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+
+            if (data.type === 'video') {
+              item.innerHTML = `<video src="${data.url}" controls></video>`;
+            } else {
+              item.innerHTML = `<img src="${data.url}" alt="Media" onclick="openZoom('${data.url}')">`;
+            }
+            grid.prepend(item);
+          }
+        });
+      }, error => {
+        console.error("Error al obtener imágenes de Firestore:", error);
+      });
+    }
+
+    // Escuchar cambios de sesión
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        authBox.classList.add('hidden');
+        galleryBox.classList.remove('hidden');
+        userEmailSpan.innerText = user.email;
+        loadSavedMedia();
+      } else {
+        authBox.classList.remove('hidden');
+        galleryBox.classList.add('hidden');
+        userEmailSpan.innerText = "";
+      }
+    });
+
+    // --- Lógica del Zoom Interactivo ---
+    let currentScale = 1;
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    let translateX = 0, translateY = 0;
+
+    const modal = document.getElementById('image-modal');
+    const modalImg = document.getElementById('modal-img');
+
+    function openZoom(src) {
+      modal.style.display = "flex";
+      modalImg.src = src;
+      resetZoomState();
+    }
+
+    function closeZoom() {
+      modal.style.display = "none";
+      resetZoomState();
+    }
+
+    function resetZoomState() {
+      currentScale = 1;
+      translateX = 0;
+      translateY = 0;
+      updateTransform();
+    }
+
+    function updateTransform() {
+      modalImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
+    }
+
+    function zoomIn(e) {
+      if (e) e.stopPropagation();
+      currentScale = Math.min(currentScale + 0.5, 5);
+      updateTransform();
+    }
+
+    function zoomOut(e) {
+      if (e) e.stopPropagation();
+      currentScale = Math.max(currentScale - 0.5, 1);
+      if (currentScale === 1) {
+        translateX = 0;
+        translateY = 0;
+      }
+      updateTransform();
+    }
+
+    function resetZoom(e) {
+      if (e) e.stopPropagation();
+      resetZoomState();
+    }
+
+    // Zoom usando la rueda del ratón (Mouse Wheel)
+    modal.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (e.deltaY < 0) {
+        currentScale = Math.min(currentScale + 0.2, 5);
+      } else {
+        currentScale = Math.max(currentScale - 0.2, 1);
+        if (currentScale === 1) {
+          translateX = 0;
+          translateY = 0;
+        }
+      }
+      updateTransform();
+    }, { passive: false });
+
+    // Arrastrar la imagen cuando tiene zoom
+    modalImg.addEventListener('mousedown', (e) => {
+      if (currentScale > 1) {
+        isDragging = true;
+        startX = e.clientX - translateX;
+        startY = e.clientY - translateY;
+      }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        translateX = e.clientX - startX;
+        translateY = e.clientY - startY;
+        updateTransform();
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    // Cerrar al hacer clic en el fondo oscuro
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeZoom();
+      }
+    });
+
+    // Widget de Cloudinary + Guardado inmediato (Preset oemolwiq en modo Unsigned)
+    const myWidget = cloudinary.createUploadWidget({
+      cloudName: 'ox4v1r1w', 
+      uploadPreset: 'oemolwiq'
+    }, (error, result) => { 
+      if (!error && result && result.event === "success") { 
+        const mediaUrl = result.info.secure_url;
+        const resourceType = result.info.resource_type;
+
+        // Guardar en la base de datos Firestore
+        db.collection('media').add({
+          url: mediaUrl,
+          type: resourceType,
+          createdAt: new Date()
+        }).then(() => {
+          console.log("Imagen guardada exitosamente en Firestore");
+        }).catch(err => {
+          console.error("Error al guardar en Firestore:", err);
+        });
+      }
+    });
+
+    document.getElementById("upload-btn").addEventListener("click", function(){
+      myWidget.open();
+    }, false);
+  </script>
+</body>
+</html>
