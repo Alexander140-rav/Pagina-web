@@ -277,6 +277,7 @@
   <!-- Formulario de Autenticación -->
   <div id="auth-box" class="auth-container">
     <h2>Acceso a la Galería</h2>
+    <input type="text" id="display-name" placeholder="Tu Nombre o Apodo (solo para registro)">
     <input type="email" id="email" placeholder="Correo electrónico" required>
     <input type="password" id="password" placeholder="Contraseña" required>
     <div class="btn-group">
@@ -352,13 +353,30 @@
     let currentUser = null;
     let unsubscribeMedia = null;
 
-    // Registrar usuario
+    // Registrar usuario guardando su Nombre
     function register() {
-      const email = document.getElementById('email').value;
+      const name = document.getElementById('display-name').value.trim();
+      const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       errorMessage.innerText = "";
 
+      if (!name) {
+        errorMessage.innerText = "Por favor, escribe tu nombre o apodo para registrarte.";
+        return;
+      }
+
       auth.createUserWithEmailAndPassword(email, password)
+        .then(userCredential => {
+          // Guardar el nombre en el perfil del usuario
+          return userCredential.user.updateProfile({
+            displayName: name
+          });
+        })
+        .then(() => {
+          // Refrescar el estado de autenticación para aplicar cambios
+          const user = auth.currentUser;
+          updateUserProfileUI(user);
+        })
         .catch(error => {
           errorMessage.innerText = "Firebase: " + error.message;
         });
@@ -366,7 +384,7 @@
 
     // Iniciar Sesión
     function login() {
-      const email = document.getElementById('email').value;
+      const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       errorMessage.innerText = "";
 
@@ -379,6 +397,13 @@
     // Cerrar Sesión
     function logout() {
       auth.signOut();
+    }
+
+    // Función auxiliar para actualizar la interfaz del perfil
+    function updateUserProfileUI(user) {
+      const nameToShow = user.displayName || user.email;
+      userEmailSpan.innerText = nameToShow;
+      userAvatarDiv.innerText = nameToShow.charAt(0).toUpperCase();
     }
 
     // Cargar fotos subidas en Firestore
@@ -408,17 +433,14 @@
         });
     }
 
-    // Escuchar cambios de sesión y generar icono de perfil
+    // Escuchar cambios de sesión
     auth.onAuthStateChanged(user => {
       if (user) {
         currentUser = user;
         authBox.classList.add('hidden');
         galleryBox.classList.remove('hidden');
         
-        // Mostrar correo y la inicial del correo en el círculo de avatar
-        userEmailSpan.innerText = user.email;
-        userAvatarDiv.innerText = user.email.charAt(0).toUpperCase();
-
+        updateUserProfileUI(user);
         loadSavedMedia();
       } else {
         currentUser = null;
@@ -537,7 +559,7 @@
         db.collection('media').add({
           url: mediaUrl,
           type: resourceType,
-          uploadedBy: currentUser.email,
+          uploadedBy: currentUser.displayName || currentUser.email,
           userId: currentUser.uid,
           createdAt: new Date()
         }).then(() => {
