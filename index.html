@@ -190,7 +190,7 @@
       appId: "1:1083437158932:web:1a2b3c4d5e6f"
     };
 
-    // Inicializar Firebase y Firestore
+    // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -230,9 +230,9 @@
       auth.signOut();
     }
 
-    // Cargar fotos guardadas en Firestore
+    // Cargar fotos guardadas en Firestore (sin filtros complejos para evitar errores de índice)
     function loadSavedMedia() {
-      db.collection('media').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+      db.collection('media').onSnapshot(snapshot => {
         snapshot.docChanges().forEach(change => {
           if (change.type === 'added') {
             const data = change.doc.data();
@@ -247,6 +247,8 @@
             grid.prepend(item);
           }
         });
+      }, error => {
+        console.error("Error al obtener imágenes de Firestore:", error);
       });
     }
 
@@ -264,7 +266,7 @@
       }
     });
 
-    // Widget de Cloudinary + Guardado automático en Firestore
+    // Widget de Cloudinary + Guardado inmediato
     const myWidget = cloudinary.createUploadWidget({
       cloudName: 'ox4v1r1w', 
       uploadPreset: 'ml_default'
@@ -273,11 +275,15 @@
         const mediaUrl = result.info.secure_url;
         const resourceType = result.info.resource_type;
 
-        // Guardar permanentemente en la base de datos Firestore
+        // Guardar en la base de datos Firestore
         db.collection('media').add({
           url: mediaUrl,
           type: resourceType,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          createdAt: new Date()
+        }).then(() => {
+          console.log("Imagen guardada exitosamente en Firestore");
+        }).catch(err => {
+          console.error("Error al guardar en Firestore:", err);
         });
       }
     });
