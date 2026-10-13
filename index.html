@@ -195,7 +195,7 @@
       display: none !important;
     }
 
-    /* Modal / Zoom Interactivo de Imágenes */
+    /* Modal / Zoom Interactivo con Navegación */
     .modal {
       display: none;
       position: fixed;
@@ -233,7 +233,49 @@
       font-size: 40px;
       font-weight: bold;
       cursor: pointer;
-      z-index: 1001;
+      z-index: 1003;
+    }
+
+    /* Botones de Navegación (Anterior / Siguiente) */
+    .nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      font-size: 2.2rem;
+      padding: 12px 18px;
+      cursor: pointer;
+      border-radius: 50%;
+      z-index: 1002;
+      transition: background 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .prev-btn {
+      left: 20px;
+    }
+
+    .next-btn {
+      right: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .nav-btn {
+        font-size: 1.6rem;
+        padding: 8px 14px;
+      }
+      .prev-btn { left: 10px; }
+      .next-btn { right: 10px; }
     }
 
     .zoom-controls {
@@ -317,10 +359,13 @@
     </div>
   </div>
 
-  <!-- Modal con Controles de Zoom -->
+  <!-- Modal con Controles de Zoom y Navegación de Fotos -->
   <div id="image-modal" class="modal">
     <span class="close-modal" onclick="closeZoom()">&times;</span>
+    <button class="nav-btn prev-btn" onclick="prevImage(event)">❮</button>
     <img class="modal-content" id="modal-img">
+    <button class="nav-btn next-btn" onclick="nextImage(event)">❯</button>
+
     <div class="zoom-controls">
       <button class="zoom-btn" onclick="zoomIn(event)">🔍 + Zoom</button>
       <button class="zoom-btn" onclick="zoomOut(event)">🔍 - Reducir</button>
@@ -466,23 +511,55 @@
       }
     });
 
-    // --- Lógica del Zoom Interactivo ---
+    // --- Lógica de Zoom y Navegación ---
     let currentScale = 1;
     let isDragging = false;
     let startX = 0, startY = 0;
     let translateX = 0, translateY = 0;
 
+    let galleryImages = [];
+    let currentImageIndex = 0;
+
     const modal = document.getElementById('image-modal');
     const modalImg = document.getElementById('modal-img');
 
+    // Escanear todas las imágenes presentes en la galería
+    function updateGalleryImageList() {
+      const imgs = Array.from(document.querySelectorAll('#gallery-grid .gallery-item img'));
+      galleryImages = imgs.map(img => img.src);
+    }
+
     function openZoom(src) {
+      updateGalleryImageList();
+      currentImageIndex = galleryImages.indexOf(src);
+      if (currentImageIndex === -1) {
+        galleryImages.push(src);
+        currentImageIndex = galleryImages.length - 1;
+      }
+
       modal.style.display = "flex";
-      modalImg.src = src;
+      modalImg.src = galleryImages[currentImageIndex];
       resetZoomState();
     }
 
     function closeZoom() {
       modal.style.display = "none";
+      resetZoomState();
+    }
+
+    function prevImage(e) {
+      if (e) e.stopPropagation();
+      if (galleryImages.length <= 1) return;
+      currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
+      modalImg.src = galleryImages[currentImageIndex];
+      resetZoomState();
+    }
+
+    function nextImage(e) {
+      if (e) e.stopPropagation();
+      if (galleryImages.length <= 1) return;
+      currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
+      modalImg.src = galleryImages[currentImageIndex];
       resetZoomState();
     }
 
@@ -518,6 +595,42 @@
       resetZoomState();
     }
 
+    // Navegar con teclas flecha izquierda, flecha derecha y Esc
+    window.addEventListener('keydown', (e) => {
+      if (modal.style.display === "flex") {
+        if (e.key === "ArrowLeft") prevImage();
+        if (e.key === "ArrowRight") nextImage();
+        if (e.key === "Escape") closeZoom();
+      }
+    });
+
+    // Deslizar con el dedo en pantallas táctiles (Touch Swipe)
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    modal.addEventListener('touchstart', (e) => {
+      if (currentScale === 1) {
+        touchStartX = e.changedTouches[0].screenX;
+      }
+    }, { passive: true });
+
+    modal.addEventListener('touchend', (e) => {
+      if (currentScale === 1) {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+      }
+    }, { passive: true });
+
+    function handleSwipe() {
+      const swipeThreshold = 50;
+      if (touchEndX < touchStartX - swipeThreshold) {
+        nextImage();
+      } else if (touchEndX > touchStartX + swipeThreshold) {
+        prevImage();
+      }
+    }
+
+    // Zoom con rueda del ratón
     modal.addEventListener('wheel', (e) => {
       e.preventDefault();
       if (e.deltaY < 0) {
@@ -532,6 +645,7 @@
       updateTransform();
     }, { passive: false });
 
+    // Arrastrar imagen ampliada
     modalImg.addEventListener('mousedown', (e) => {
       if (currentScale > 1) {
         isDragging = true;
