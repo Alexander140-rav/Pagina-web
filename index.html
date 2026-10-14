@@ -606,7 +606,7 @@
         <span>🎥 <strong id="video-count">0</strong> Videos</span>
       </div>
 
-      <!-- Input de archivo oculto para Catbox.moe -->
+      <!-- Input de archivo oculto -->
       <input type="file" id="catbox-file-input" accept="image/*,video/*" style="display: none;">
       <button class="btn-login" id="upload-btn">Subir Imagen/Video</button>
     </div>
@@ -1111,7 +1111,7 @@
 
     window.addEventListener('mouseup', () => { isDragging = false; });
 
-    // --- Subida de Archivos con Catbox.moe + Proxy de Respaldo ---
+    // --- Subida de Archivos Directa (Soporta CORS nativo + Fotos/Videos legal +18) ---
     const fileInput = document.getElementById("catbox-file-input");
     const uploadBtn = document.getElementById("upload-btn");
 
@@ -1124,36 +1124,48 @@
         const file = e.target.files[0];
         if (!file || !currentUser) return;
 
-        showToast("Subiendo archivo a Catbox... Por favor espera ⏳", "info");
+        showToast("Subiendo archivo... Por favor espera ⏳", "info");
 
         try {
-          const formData = new FormData();
-          formData.append('reqtype', 'fileupload');
-          formData.append('fileToUpload', file);
+          let mediaUrl = "";
 
-          // Intentar primero con el proxy de codetabs
-          let response = await fetch('https://api.codetabs.com/v1/proxy?quest=https://catbox.moe/user/api.php', {
-            method: 'POST',
-            body: formData
+          // 1. Método Principal: Subida directa con API Pixeldrain (Soporta CORS nativo, sin proxies)
+          const response = await fetch(`https://pixeldrain.com/api/file/${encodeURIComponent(file.name)}`, {
+            method: 'PUT',
+            body: file
           });
 
-          // Si el primer proxy falla, intentar con corsproxy.io como respaldo
-          if (!response.ok) {
-            response = await fetch('https://corsproxy.io/?https://catbox.moe/user/api.php', {
+          if (response.ok) {
+            const result = await response.json();
+            if (result.success && result.id) {
+              mediaUrl = `https://pixeldrain.com/api/file/${result.id}`;
+            }
+          }
+
+          // 2. Método de Respaldo: Catbox vía proxy si el método principal fallara
+          if (!mediaUrl) {
+            const formData = new FormData();
+            formData.append('reqtype', 'fileupload');
+            formData.append('fileToUpload', file);
+
+            const catboxRes = await fetch('https://corsproxy.org/?' + encodeURIComponent('https://catbox.moe/user/api.php'), {
               method: 'POST',
               body: formData
             });
+
+            if (catboxRes.ok) {
+              mediaUrl = (await catboxRes.text()).trim();
+            }
           }
 
-          if (!response.ok) {
-            const errorInfo = await response.text();
-            throw new Error(`HTTP ${response.status}: ${errorInfo || 'Rechazado'}`);
+          if (!mediaUrl || !mediaUrl.startsWith('http')) {
+            throw new Error("El servidor de archivos no devolvió un enlace válido.");
           }
 
-          const mediaUrl = (await response.text()).trim();
           const isVideo = file.type.startsWith('video/');
           const resourceType = isVideo ? 'video' : 'image';
 
+          // Guardar enlace directo en la base de datos Firestore
           await db.collection('media').add({
             url: mediaUrl,
             type: resourceType,
@@ -1167,7 +1179,7 @@
           fileInput.value = "";
         } catch (err) {
           console.error("Error al subir:", err);
-          showToast("Error al subir: " + err.message, "error");
+          showToast("Error al subir el archivo: " + err.message, "error");
         }
       });
     }
