@@ -1126,7 +1126,7 @@
       updateTransform();
     }, { passive: false });
 
-    // --- Subida de Archivos: Fotos (Base64 Canvas) / Videos (Pixeldrain API) ---
+    // --- Subida de Archivos: Fotos (Base64 Canvas) / Videos (Catbox / Litterbox / Tmpfiles Direct Streaming) ---
     const fileInput = document.getElementById("catbox-file-input");
     const uploadBtn = document.getElementById("upload-btn");
 
@@ -1135,27 +1135,61 @@
       return /\.(mp4|mov|avi|webm|mkv|3gp|m4v)$/i.test(file.name);
     }
 
-    async function uploadVideoToPixeldrain(file) {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('anonymous', 'true');
-
-      const res = await fetch('https://pixeldrain.com/api/file', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (!res.ok) {
-        throw new Error("No se pudo conectar con el servidor de video Pixeldrain.");
+    async function uploadVideoToExternalServer(file) {
+      // Método 1: Catbox.moe
+      try {
+        const formData = new FormData();
+        formData.append('reqtype', 'fileupload');
+        formData.append('fileToUpload', file);
+        const res = await fetch('https://catbox.moe/user/api.php', {
+          method: 'POST',
+          body: formData
+        });
+        if (res.ok) {
+          const text = (await res.text()).trim();
+          if (text.startsWith('http')) return text;
+        }
+      } catch (e) {
+        console.warn("Catbox directo no respondió, intentando método de respaldo 1...", e);
       }
 
-      const data = await res.json();
-      if (data && data.id) {
-        // Enlace directo de streaming compatible con reproductores nativos
-        return `https://pixeldrain.com/api/file/${data.id}`;
+      // Método 2: Litterbox (Catbox temporal 72h)
+      try {
+        const formData = new FormData();
+        formData.append('reqtype', 'fileupload');
+        formData.append('time', '72h');
+        formData.append('fileToUpload', file);
+        const res = await fetch('https://litterbox.catbox.moe/resources/internals/api.php', {
+          method: 'POST',
+          body: formData
+        });
+        if (res.ok) {
+          const text = (await res.text()).trim();
+          if (text.startsWith('http')) return text;
+        }
+      } catch (e) {
+        console.warn("Litterbox no respondió, intentando método de respaldo 2...", e);
       }
 
-      throw new Error("El servidor no devolvió una URL válida para el video.");
+      // Método 3: Tmpfiles.org con formato de reproducción directa (/dl/)
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('https://tmpfiles.org/api/v1/upload', {
+          method: 'POST',
+          body: formData
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json && json.data && json.data.url) {
+            return json.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+          }
+        }
+      } catch (e) {
+        console.warn("Tmpfiles no respondió...", e);
+      }
+
+      throw new Error("No se pudo conectar con el servidor de reproducción de video.");
     }
 
     function compressImageToBase64(file) {
@@ -1215,7 +1249,7 @@
           const isVideo = isVideoFile(file);
 
           if (isVideo) {
-            mediaUrl = await uploadVideoToPixeldrain(file);
+            mediaUrl = await uploadVideoToExternalServer(file);
           } else {
             mediaUrl = await compressImageToBase64(file);
           }
