@@ -1111,70 +1111,61 @@
 
     window.addEventListener('mouseup', () => { isDragging = false; });
 
-    // --- Subida de Archivos con Múltiples Proxies de Respaldo para Catbox/Litterbox ---
+    // --- Subida Nativa Directa a Firestore (Optimizada y 100% Sin Errores de CORS) ---
     const fileInput = document.getElementById("catbox-file-input");
     const uploadBtn = document.getElementById("upload-btn");
 
-    async function uploadToCatbox(file) {
-      const uploadMethods = [
-        // Método 1: CodeTabs proxy -> Catbox
-        async () => {
-          const formData = new FormData();
-          formData.append('reqtype', 'fileupload');
-          formData.append('fileToUpload', file);
-          const res = await fetch('https://api.codetabs.com/v1/proxy?quest=https://catbox.moe/user/api.php', {
-            method: 'POST',
-            body: formData
-          });
-          if (!res.ok) throw new Error('CodeTabs rechazó la petición');
-          const text = (await res.text()).trim();
-          if (!text.startsWith('http')) throw new Error('Respuesta no válida de Catbox');
-          return text;
-        },
-        // Método 2: CorsProxy.io -> Catbox
-        async () => {
-          const formData = new FormData();
-          formData.append('reqtype', 'fileupload');
-          formData.append('fileToUpload', file);
-          const res = await fetch('https://corsproxy.io/?https://catbox.moe/user/api.php', {
-            method: 'POST',
-            body: formData
-          });
-          if (!res.ok) throw new Error('CorsProxy.io rechazó la petición');
-          const text = (await res.text()).trim();
-          if (!text.startsWith('http')) throw new Error('Respuesta no válida de Catbox');
-          return text;
-        },
-        // Método 3: CodeTabs proxy -> Litterbox (Catbox temporal de respaldo)
-        async () => {
-          const formData = new FormData();
-          formData.append('reqtype', 'fileupload');
-          formData.append('time', '72h');
-          formData.append('fileToUpload', file);
-          const res = await fetch('https://api.codetabs.com/v1/proxy?quest=https://litterbox.catbox.moe/resources/internals/api.php', {
-            method: 'POST',
-            body: formData
-          });
-          if (!res.ok) throw new Error('Litterbox rechazó la petición');
-          const text = (await res.text()).trim();
-          if (!text.startsWith('http')) throw new Error('Respuesta no válida de Litterbox');
-          return text;
-        }
-      ];
-
-      let lastErr = null;
-      for (let i = 0; i < uploadMethods.length; i++) {
-        try {
-          const resultUrl = await uploadMethods[i]();
-          if (resultUrl && resultUrl.startsWith('http')) {
-            return resultUrl;
+    function compressAndConvertToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+          // Si es un video, retornar directamente el Data URL
+          if (file.type.startsWith('video/')) {
+            if (file.size > 12 * 1024 * 1024) {
+              reject(new Error("El video supera el límite máximo permitido para subida libre."));
+              return;
+            }
+            resolve(event.target.result);
+            return;
           }
-        } catch (err) {
-          console.warn(`Método ${i + 1} falló:`, err);
-          lastErr = err;
-        }
-      }
-      throw new Error(lastErr ? lastErr.message : "Todos los servidores de subida fallaron");
+
+          // Para imágenes: comprimir y optimizar con Canvas
+          const img = new Image();
+          img.src = event.target.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 1200;
+            const MAX_HEIGHT = 1200;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Generar imagen JPEG comprimida de alta calidad (~150 KB)
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.82);
+            resolve(compressedBase64);
+          };
+          img.onerror = () => reject(new Error("No se pudo procesar la imagen seleccionada."));
+        };
+        reader.onerror = () => reject(new Error("Error al leer el archivo en el equipo."));
+      });
     }
 
     if (uploadBtn && fileInput) {
@@ -1186,13 +1177,14 @@
         const file = e.target.files[0];
         if (!file || !currentUser) return;
 
-        showToast("Subiendo archivo a Catbox... Por favor espera ⏳", "info");
+        showToast("Procesando y subiendo archivo... Por favor espera ⏳", "info");
 
         try {
-          const mediaUrl = await uploadToCatbox(file);
+          const mediaUrl = await compressAndConvertToBase64(file);
           const isVideo = file.type.startsWith('video/');
           const resourceType = isVideo ? 'video' : 'image';
 
+          // Guardar directamente en Firestore (Nativo, sin CORS ni servidores de terceros)
           await db.collection('media').add({
             url: mediaUrl,
             type: resourceType,
