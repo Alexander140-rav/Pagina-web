@@ -1126,7 +1126,7 @@
       updateTransform();
     }, { passive: false });
 
-    // --- Subida de Archivos: Fotos (Base64 Canvas) / Videos (Catbox / Litterbox / Tmpfiles Direct Streaming) ---
+    // --- Subida de Archivos: Fotos (Base64 Canvas) / Videos (Servidor de medios directo) ---
     const fileInput = document.getElementById("catbox-file-input");
     const uploadBtn = document.getElementById("upload-btn");
 
@@ -1136,7 +1136,7 @@
     }
 
     async function uploadVideoToExternalServer(file) {
-      // Método 1: Catbox.moe
+      // Método 1: Catbox
       try {
         const formData = new FormData();
         formData.append('reqtype', 'fileupload');
@@ -1150,10 +1150,10 @@
           if (text.startsWith('http')) return text;
         }
       } catch (e) {
-        console.warn("Catbox directo no respondió, intentando método de respaldo 1...", e);
+        console.warn("Catbox directo no respondió, probando alternativa...", e);
       }
 
-      // Método 2: Litterbox (Catbox temporal 72h)
+      // Método 2: Litterbox
       try {
         const formData = new FormData();
         formData.append('reqtype', 'fileupload');
@@ -1168,10 +1168,10 @@
           if (text.startsWith('http')) return text;
         }
       } catch (e) {
-        console.warn("Litterbox no respondió, intentando método de respaldo 2...", e);
+        console.warn("Litterbox no respondió, probando alternativa...", e);
       }
 
-      // Método 3: Tmpfiles.org con formato de reproducción directa (/dl/)
+      // Método 3: Tmpfiles con enlace directo /dl/
       try {
         const formData = new FormData();
         formData.append('file', file);
@@ -1189,7 +1189,7 @@
         console.warn("Tmpfiles no respondió...", e);
       }
 
-      throw new Error("No se pudo conectar con el servidor de reproducción de video.");
+      throw new Error("No se pudo conectar con el servidor de videos.");
     }
 
     function compressImageToBase64(file) {
