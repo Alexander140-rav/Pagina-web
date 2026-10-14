@@ -1111,7 +1111,7 @@
 
     window.addEventListener('mouseup', () => { isDragging = false; });
 
-    // --- Subida de Archivos: Fotos (Base64 Canvas) / Videos (Servidor externo) ---
+    // --- Subida de Archivos: Fotos (Base64 Canvas) / Videos (Servidor de medios directo) ---
     const fileInput = document.getElementById("catbox-file-input");
     const uploadBtn = document.getElementById("upload-btn");
 
@@ -1121,7 +1121,7 @@
     }
 
     async function uploadVideoToExternalServer(file) {
-      // Servidor 1: tmpfiles.org
+      // Intento 1: tmpfiles.org
       try {
         const formData = new FormData();
         formData.append('file', file);
@@ -1136,28 +1136,26 @@
           }
         }
       } catch (e) {
-        console.warn("Error en tmpfiles, intentando servidor de respaldo...", e);
+        console.warn("Error en tmpfiles, intentando servidor secundario...", e);
       }
 
-      // Servidor 2: Litterbox
+      // Intento 2: file.io
       try {
         const formData = new FormData();
-        formData.append('reqtype', 'fileupload');
-        formData.append('time', '72h');
-        formData.append('fileToUpload', file);
-        const res = await fetch('https://api.codetabs.com/v1/proxy?quest=https://litterbox.catbox.moe/resources/internals/api.php', {
+        formData.append('file', file);
+        const res = await fetch('https://file.io', {
           method: 'POST',
           body: formData
         });
         if (res.ok) {
-          const text = (await res.text()).trim();
-          if (text.startsWith('http')) return text;
+          const json = await res.json();
+          if (json && json.link) return json.link;
         }
       } catch (e) {
-        console.warn("Error en proxy de Litterbox...", e);
+        console.warn("Error en file.io...", e);
       }
 
-      throw new Error("No se pudo subir el video. Por favor elige un archivo más corto o liviano.");
+      throw new Error("No se pudo conectar con el servidor de videos.");
     }
 
     function compressImageToBase64(file) {
@@ -1222,9 +1220,8 @@
             mediaUrl = await compressImageToBase64(file);
           }
 
-          // Candado de seguridad: Evitar choque con el límite de 1MB de Firestore
           if (mediaUrl.length > 950000) {
-            throw new Error("El archivo es demasiado pesado para la base de datos. Selecciona un archivo más corto.");
+            throw new Error("El archivo excede el tamaño máximo de Firestore.");
           }
 
           const resourceType = isVideo ? 'video' : 'image';
