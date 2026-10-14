@@ -1111,9 +1111,71 @@
 
     window.addEventListener('mouseup', () => { isDragging = false; });
 
-    // --- Subida de Archivos Directa (Soporta CORS nativo + Fotos/Videos legal +18) ---
+    // --- Subida de Archivos con Múltiples Proxies de Respaldo para Catbox/Litterbox ---
     const fileInput = document.getElementById("catbox-file-input");
     const uploadBtn = document.getElementById("upload-btn");
+
+    async function uploadToCatbox(file) {
+      const uploadMethods = [
+        // Método 1: CodeTabs proxy -> Catbox
+        async () => {
+          const formData = new FormData();
+          formData.append('reqtype', 'fileupload');
+          formData.append('fileToUpload', file);
+          const res = await fetch('https://api.codetabs.com/v1/proxy?quest=https://catbox.moe/user/api.php', {
+            method: 'POST',
+            body: formData
+          });
+          if (!res.ok) throw new Error('CodeTabs rechazó la petición');
+          const text = (await res.text()).trim();
+          if (!text.startsWith('http')) throw new Error('Respuesta no válida de Catbox');
+          return text;
+        },
+        // Método 2: CorsProxy.io -> Catbox
+        async () => {
+          const formData = new FormData();
+          formData.append('reqtype', 'fileupload');
+          formData.append('fileToUpload', file);
+          const res = await fetch('https://corsproxy.io/?https://catbox.moe/user/api.php', {
+            method: 'POST',
+            body: formData
+          });
+          if (!res.ok) throw new Error('CorsProxy.io rechazó la petición');
+          const text = (await res.text()).trim();
+          if (!text.startsWith('http')) throw new Error('Respuesta no válida de Catbox');
+          return text;
+        },
+        // Método 3: CodeTabs proxy -> Litterbox (Catbox temporal de respaldo)
+        async () => {
+          const formData = new FormData();
+          formData.append('reqtype', 'fileupload');
+          formData.append('time', '72h');
+          formData.append('fileToUpload', file);
+          const res = await fetch('https://api.codetabs.com/v1/proxy?quest=https://litterbox.catbox.moe/resources/internals/api.php', {
+            method: 'POST',
+            body: formData
+          });
+          if (!res.ok) throw new Error('Litterbox rechazó la petición');
+          const text = (await res.text()).trim();
+          if (!text.startsWith('http')) throw new Error('Respuesta no válida de Litterbox');
+          return text;
+        }
+      ];
+
+      let lastErr = null;
+      for (let i = 0; i < uploadMethods.length; i++) {
+        try {
+          const resultUrl = await uploadMethods[i]();
+          if (resultUrl && resultUrl.startsWith('http')) {
+            return resultUrl;
+          }
+        } catch (err) {
+          console.warn(`Método ${i + 1} falló:`, err);
+          lastErr = err;
+        }
+      }
+      throw new Error(lastErr ? lastErr.message : "Todos los servidores de subida fallaron");
+    }
 
     if (uploadBtn && fileInput) {
       uploadBtn.addEventListener("click", () => {
@@ -1124,48 +1186,13 @@
         const file = e.target.files[0];
         if (!file || !currentUser) return;
 
-        showToast("Subiendo archivo... Por favor espera ⏳", "info");
+        showToast("Subiendo archivo a Catbox... Por favor espera ⏳", "info");
 
         try {
-          let mediaUrl = "";
-
-          // 1. Método Principal: Subida directa con API Pixeldrain (Soporta CORS nativo, sin proxies)
-          const response = await fetch(`https://pixeldrain.com/api/file/${encodeURIComponent(file.name)}`, {
-            method: 'PUT',
-            body: file
-          });
-
-          if (response.ok) {
-            const result = await response.json();
-            if (result.success && result.id) {
-              mediaUrl = `https://pixeldrain.com/api/file/${result.id}`;
-            }
-          }
-
-          // 2. Método de Respaldo: Catbox vía proxy si el método principal fallara
-          if (!mediaUrl) {
-            const formData = new FormData();
-            formData.append('reqtype', 'fileupload');
-            formData.append('fileToUpload', file);
-
-            const catboxRes = await fetch('https://corsproxy.org/?' + encodeURIComponent('https://catbox.moe/user/api.php'), {
-              method: 'POST',
-              body: formData
-            });
-
-            if (catboxRes.ok) {
-              mediaUrl = (await catboxRes.text()).trim();
-            }
-          }
-
-          if (!mediaUrl || !mediaUrl.startsWith('http')) {
-            throw new Error("El servidor de archivos no devolvió un enlace válido.");
-          }
-
+          const mediaUrl = await uploadToCatbox(file);
           const isVideo = file.type.startsWith('video/');
           const resourceType = isVideo ? 'video' : 'image';
 
-          // Guardar enlace directo en la base de datos Firestore
           await db.collection('media').add({
             url: mediaUrl,
             type: resourceType,
@@ -1179,7 +1206,7 @@
           fileInput.value = "";
         } catch (err) {
           console.error("Error al subir:", err);
-          showToast("Error al subir el archivo: " + err.message, "error");
+          showToast("Error al subir: " + err.message, "error");
         }
       });
     }
