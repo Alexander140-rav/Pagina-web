@@ -303,6 +303,7 @@
       height: 280px;
       object-fit: cover;
       display: block;
+      background: #000;
       cursor: pointer;
     }
 
@@ -390,9 +391,17 @@
       align-items: center;
     }
 
+    .modal-media-container {
+      max-width: 85%;
+      max-height: 85%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
     .modal-content {
-      max-width: 80%;
-      max-height: 80%;
+      max-width: 100%;
+      max-height: 80vh;
       border-radius: 8px;
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
       object-fit: contain;
@@ -633,7 +642,11 @@
     
     <div class="modal-main">
       <button class="nav-btn prev-btn" onclick="prevImage(event)">❮</button>
-      <img class="modal-content" id="modal-img">
+      
+      <div class="modal-media-container" id="modal-media-container">
+        <img class="modal-content" id="modal-img">
+      </div>
+
       <button class="nav-btn next-btn" onclick="nextImage(event)">❯</button>
 
       <div class="zoom-controls">
@@ -837,7 +850,7 @@
 
         let mediaElement = '';
         if (item.type === 'video') {
-          mediaElement = `<video src="${item.url}" controls></video>`;
+          mediaElement = `<video src="${item.url}" controls playsinline preload="metadata" style="width:100%; height:280px; object-fit:cover; background:#000;"></video>`;
         } else {
           mediaElement = `<img src="${item.url}" alt="Media" onclick="openZoom('${item.id}')">`;
         }
@@ -934,7 +947,6 @@
     let currentImageIndex = 0;
 
     const modal = document.getElementById('image-modal');
-    const modalImg = document.getElementById('modal-img');
     const commentsDrawer = document.getElementById('comments-drawer');
 
     function openZoom(id) {
@@ -945,7 +957,25 @@
       currentImageIndex = allMediaItems.findIndex(i => i.id === id);
 
       modal.style.display = "flex";
-      modalImg.src = item.url;
+      
+      const container = document.getElementById('modal-media-container');
+      container.innerHTML = '';
+
+      if (item.type === 'video') {
+        const video = document.createElement('video');
+        video.src = item.url;
+        video.controls = true;
+        video.playsInline = true;
+        video.id = 'modal-media';
+        video.className = 'modal-content';
+        container.appendChild(video);
+      } else {
+        const img = document.createElement('img');
+        img.src = item.url;
+        img.id = 'modal-media';
+        img.className = 'modal-content';
+        container.appendChild(img);
+      }
 
       updateModalLikeBtn();
       resetZoomState();
@@ -1054,7 +1084,10 @@
     }
 
     function updateTransform() {
-      modalImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
+      const el = document.getElementById('modal-media');
+      if (el) {
+        el.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
+      }
     }
 
     function zoomIn(e) {
@@ -1093,25 +1126,7 @@
       updateTransform();
     }, { passive: false });
 
-    modalImg.addEventListener('mousedown', (e) => {
-      if (currentScale > 1) {
-        isDragging = true;
-        startX = e.clientX - translateX;
-        startY = e.clientY - translateY;
-      }
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (isDragging) {
-        translateX = e.clientX - startX;
-        translateY = e.clientY - startY;
-        updateTransform();
-      }
-    });
-
-    window.addEventListener('mouseup', () => { isDragging = false; });
-
-    // --- Subida de Archivos: Fotos (Base64 Canvas) / Videos (Servidor de medios directo) ---
+    // --- Subida de Archivos: Fotos (Base64 Canvas) / Videos (Pixeldrain API) ---
     const fileInput = document.getElementById("catbox-file-input");
     const uploadBtn = document.getElementById("upload-btn");
 
@@ -1120,42 +1135,27 @@
       return /\.(mp4|mov|avi|webm|mkv|3gp|m4v)$/i.test(file.name);
     }
 
-    async function uploadVideoToExternalServer(file) {
-      // Intento 1: tmpfiles.org
-      try {
-        const formData = new FormData();
-        formData.append('file', file);
-        const res = await fetch('https://tmpfiles.org/api/v1/upload', {
-          method: 'POST',
-          body: formData
-        });
-        if (res.ok) {
-          const json = await res.json();
-          if (json && json.data && json.data.url) {
-            return json.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
-          }
-        }
-      } catch (e) {
-        console.warn("Error en tmpfiles, intentando servidor secundario...", e);
+    async function uploadVideoToPixeldrain(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('anonymous', 'true');
+
+      const res = await fetch('https://pixeldrain.com/api/file', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!res.ok) {
+        throw new Error("No se pudo conectar con el servidor de video Pixeldrain.");
       }
 
-      // Intento 2: file.io
-      try {
-        const formData = new FormData();
-        formData.append('file', file);
-        const res = await fetch('https://file.io', {
-          method: 'POST',
-          body: formData
-        });
-        if (res.ok) {
-          const json = await res.json();
-          if (json && json.link) return json.link;
-        }
-      } catch (e) {
-        console.warn("Error en file.io...", e);
+      const data = await res.json();
+      if (data && data.id) {
+        // Enlace directo de streaming compatible con reproductores nativos
+        return `https://pixeldrain.com/api/file/${data.id}`;
       }
 
-      throw new Error("No se pudo conectar con el servidor de videos.");
+      throw new Error("El servidor no devolvió una URL válida para el video.");
     }
 
     function compressImageToBase64(file) {
@@ -1215,13 +1215,13 @@
           const isVideo = isVideoFile(file);
 
           if (isVideo) {
-            mediaUrl = await uploadVideoToExternalServer(file);
+            mediaUrl = await uploadVideoToPixeldrain(file);
           } else {
             mediaUrl = await compressImageToBase64(file);
           }
 
           if (mediaUrl.length > 950000) {
-            throw new Error("El archivo excede el tamaño máximo de Firestore.");
+            throw new Error("El archivo excede el tamaño máximo permitido.");
           }
 
           const resourceType = isVideo ? 'video' : 'image';
