@@ -541,25 +541,26 @@
     .comment-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .reply-btn {
       background: transparent;
       border: none;
       color: #38bdf8;
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       cursor: pointer;
       padding: 0;
+      font-weight: bold;
     }
 
     .delete-comment-btn {
       background: transparent;
       border: none;
       color: #f87171;
-      font-size: 0.75rem;
+      font-size: 0.82rem;
       cursor: pointer;
-      padding: 0;
+      padding: 0 2px;
     }
 
     .comment-text {
@@ -1090,7 +1091,9 @@
           snapshot.forEach(doc => {
             const c = doc.data();
             const commentId = doc.id;
-            const isCommentAuthor = currentUser && (c.userId === currentUser.uid);
+            
+            // Permite borrar si eres autor del comentario, o si tu nombre/email coincide con el autor o el dueño de la imagen
+            const isCommentAuthor = currentUser && (c.userId === currentUser.uid || c.userName === (currentUser.displayName || currentUser.email));
             const isMediaOwner = currentUser && currentMediaItem && (currentMediaItem.userId === currentUser.uid);
             const canDeleteComment = isCommentAuthor || isMediaOwner;
 
@@ -1106,7 +1109,7 @@
                 <strong>${escapeHtml(c.userName)}</strong>
                 <div class="comment-actions">
                   <small style="color:#888;">${timeStr}</small>
-                  <button class="reply-btn" onclick="prepareReply('${escapeHtml(c.userName)}')">↩️</button>
+                  <button class="reply-btn" onclick="prepareReply('${escapeHtml(c.userName)}')">↩️ Responder</button>
                   ${deleteBtnHtml}
                 </div>
               </div>
