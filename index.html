@@ -669,11 +669,8 @@
     let activeFilter = 'all';
     let activeSort = 'newest';
 
-    const staticLocalFiles = [
-      "imagenes/28838659.jpg", "imagenes/images (1).jpg", "imagenes/images (2).jpg",
-      "imagenes/images (3).jpg", "imagenes/images (4).jpg", "imagenes/images.jpg",
-      "imagenes/Priscilla Lopez 2.jpeg", "imagenes/priscilla-lopez_01.jpg", "imagenes/Priscillalopezm.jpg"
-    ];
+    // Arreglo de fotos locales vaciado para eliminar las imágenes estáticas por defecto
+    const staticLocalFiles = [];
 
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
@@ -1069,17 +1066,14 @@
     }, false);
 
     function handleSwipe() {
-      // Solo cambiar si la imagen no está con Zoom activo
       if (currentScale > 1) return;
 
       const swipeDistance = touchEndX - touchStartX;
-      const minSwipeDistance = 50; // Distancia mínima para detectar el deslizamiento
+      const minSwipeDistance = 50;
 
       if (swipeDistance > minSwipeDistance) {
-        // Deslizar a la derecha = Imagen anterior
         prevImage();
       } else if (swipeDistance < -minSwipeDistance) {
-        // Deslizar a la izquierda = Siguiente imagen
         nextImage();
       }
     }
