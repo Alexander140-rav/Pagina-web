@@ -319,6 +319,7 @@
       gap: 20px;
       max-width: 1200px;
       margin: 0 auto;
+      width: 100%;
     }
 
     .gallery-card {
@@ -601,11 +602,64 @@
       font-size: 0.9rem;
     }
 
-    @media (max-width: 650px) {
+    /* REGLAS RESPONSIVE PARA MÓVILES (Evita el zoom excesivo) */
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .user-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 12px;
+      }
+
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .filter-tabs {
+        justify-content: center;
+        width: 100%;
+      }
+
+      .filter-btn {
+        padding: 6px 12px;
+        font-size: 0.78rem;
+        flex: 1;
+        text-align: center;
+      }
+
+      .sort-btn {
+        width: 100%;
+        text-align: center;
+      }
+
+      .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 12px;
+      }
+
+      .gallery-card img, .gallery-card video {
+        height: 180px;
+      }
+
       .comments-drawer {
         width: 100%;
       }
-      .nav-btn { font-size: 1.5rem; padding: 6px 12px; }
+
+      .nav-btn {
+        font-size: 1.5rem;
+        padding: 6px 12px;
+      }
+
       .prev-btn { left: 8px; }
       .next-btn { right: 8px; }
     }
@@ -616,11 +670,11 @@
   <!-- Contenedor de Notificaciones Toast -->
   <div id="toast-container" class="toast-container"></div>
 
-  <h1>Galería Privada</h1>
+  <h1>C U L O S</h1>
 
   <!-- Formulario de Autenticación -->
   <div id="auth-box" class="auth-container">
-    <h2>Acceso a la Galería</h2>
+    <h2>Inicio de sesión</h2>
     <input type="text" id="display-name" placeholder="👤 Nombre o Apodo (solo para registro)">
     <input type="email" id="email" placeholder="✉️ Correo electrónico" required>
     <input type="password" id="password" placeholder="🔒 Contraseña" required>
@@ -1278,4 +1332,4 @@
     }
   </script>
 </body>
-</html> 
+</html>
