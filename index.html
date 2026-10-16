@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>C U L O S</title>
   
   <!-- Firebase SDKs (Auth + Firestore) -->
@@ -18,22 +18,23 @@
       font-family: Arial, sans-serif;
     }
 
-    /* Fondo oscuro con gradiente */
     body {
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       color: #f8fafc;
-      padding: 20px;
+      padding: 15px;
+      width: 100%;
+      overflow-x: hidden;
     }
 
     h1 {
       text-align: center;
-      margin-bottom: 20px;
-      font-size: 2rem;
+      margin: 10px 0 20px 0;
+      font-size: 1.8rem;
       letter-spacing: 2px;
       color: #ffffff;
     }
@@ -41,8 +42,8 @@
     /* Toast Notifications */
     .toast-container {
       position: fixed;
-      top: 20px;
-      right: 20px;
+      top: 15px;
+      right: 15px;
       z-index: 2000;
       display: flex;
       flex-direction: column;
@@ -53,10 +54,10 @@
     .toast {
       background: #333;
       color: white;
-      padding: 12px 20px;
+      padding: 10px 16px;
       border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-      font-size: 0.9rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      font-size: 0.85rem;
       font-weight: bold;
       pointer-events: auto;
       animation: slideIn 0.3s ease;
@@ -80,107 +81,83 @@
       transition: opacity 0.3s, transform 0.3s;
     }
 
-    /* Tarjeta Glassmorphism */
+    /* Tarjeta Auth */
     .auth-container {
       max-width: 420px;
-      width: 90%;
-      margin: 20px auto;
+      width: 100%;
+      margin: 10px auto;
       background: rgba(255, 255, 255, 0.08) !important;
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 35px 30px;
+      padding: 25px 20px;
       border-radius: 20px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
       text-align: center;
     }
 
     .auth-container h2 {
-      margin-bottom: 25px;
-      font-size: 1.6rem;
+      margin-bottom: 20px;
+      font-size: 1.4rem;
       color: #ffffff;
     }
 
     .auth-container input {
       width: 100%;
-      padding: 14px 16px;
-      margin-bottom: 15px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 10px;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: #ffffff;
       outline: none;
-      transition: all 0.3s ease;
     }
 
     .auth-container input::placeholder {
       color: #94a3b8;
     }
 
-    .auth-container input:focus {
-      border-color: #38bdf8;
-      background: rgba(255, 255, 255, 0.1);
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
-    }
-
     .btn-group {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       justify-content: center;
       margin-top: 10px;
     }
 
     button {
-      padding: 12px 20px;
-      font-size: 0.95rem;
+      padding: 10px 16px;
+      font-size: 0.9rem;
       border: none;
       border-radius: 10px;
       cursor: pointer;
       font-weight: bold;
-      transition: all 0.2s ease;
       flex: 1;
     }
 
     .btn-login {
       background: linear-gradient(135deg, #3b82f6, #2563eb);
       color: white;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-    }
-
-    .btn-login:hover {
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      transform: translateY(-1px);
     }
 
     .btn-register {
       background-color: #10b981;
       color: white;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    }
-
-    .btn-register:hover {
-      background-color: #059669;
-      transform: translateY(-1px);
     }
 
     .btn-logout {
       background-color: #dc3545;
       color: white;
       padding: 6px 12px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       border-radius: 15px;
-    }
-
-    .btn-logout:hover {
-      background-color: #bd2130;
     }
 
     .btn-edit-name {
       background: transparent;
       border: none;
       color: #38bdf8;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       cursor: pointer;
       padding: 0;
       text-decoration: underline;
@@ -188,45 +165,49 @@
 
     #error-message {
       color: #f87171;
-      margin-top: 15px;
-      font-size: 0.9rem;
+      margin-top: 12px;
+      font-size: 0.85rem;
       word-break: break-word;
     }
 
     /* Panel Galería */
+    #gallery-box {
+      width: 100%;
+      max-width: 1200px;
+    }
+
     .user-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      max-width: 1200px;
+      width: 100%;
       margin: 0 auto 15px auto;
       background: rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(12px);
-      padding: 12px 20px;
+      padding: 12px 16px;
       border-radius: 12px;
       border: 1px solid rgba(255, 255, 255, 0.15);
       flex-wrap: wrap;
-      gap: 15px;
+      gap: 12px;
     }
 
     .profile-card {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .profile-avatar {
-      width: 45px;
-      height: 45px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background: linear-gradient(135deg, #007bff, #6610f2);
       color: white;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.3rem;
+      font-size: 1.1rem;
       font-weight: bold;
-      box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
       text-transform: uppercase;
     }
 
@@ -238,27 +219,27 @@
 
     .profile-email {
       font-weight: bold;
-      font-size: 1rem;
+      font-size: 0.9rem;
       color: #ffffff;
     }
 
     .profile-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .media-stats {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 8px 16px;
+      padding: 6px 14px;
       border-radius: 20px;
-      font-size: 0.9rem;
+      font-size: 0.82rem;
       font-weight: bold;
       color: #cbd5e1;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .media-stats strong {
@@ -266,35 +247,30 @@
     }
 
     .toolbar {
-      max-width: 1200px;
-      margin: 0 auto 20px auto;
+      width: 100%;
+      margin: 0 auto 15px auto;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
     }
 
     .filter-tabs {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
     }
 
     .filter-btn {
       background: rgba(255, 255, 255, 0.1);
       color: #cbd5e1;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 0.88rem;
+      padding: 6px 12px;
+      border-radius: 18px;
+      font-size: 0.8rem;
       font-weight: bold;
       border: none;
       cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .filter-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
     }
 
     .filter-btn.active {
@@ -306,54 +282,52 @@
       background: rgba(255, 255, 255, 0.1);
       color: white;
       border: 1px solid rgba(255, 255, 255, 0.2);
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 0.85rem;
+      padding: 6px 12px;
+      border-radius: 18px;
+      font-size: 0.8rem;
       font-weight: bold;
       cursor: pointer;
     }
 
+    /* Grilla Ajustada */
     .gallery-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 20px;
-      max-width: 1200px;
-      margin: 0 auto;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
       width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 18px;
+      }
     }
 
     .gallery-card {
       position: relative;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
+      border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .gallery-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
     }
 
     .gallery-card img, .gallery-card video {
       width: 100%;
-      height: 280px;
+      height: 200px;
       object-fit: cover;
       display: block;
       background: #000;
-      cursor: pointer;
     }
 
     .card-footer {
-      padding: 10px 14px;
+      padding: 8px 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(15, 23, 42, 0.8);
+      background: rgba(15, 23, 42, 0.85);
       border-top: 1px solid rgba(255, 255, 255, 0.1);
-      font-size: 0.85rem;
+      font-size: 0.78rem;
     }
 
     .author-tag {
@@ -362,31 +336,25 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 120px;
+      max-width: 80px;
     }
 
     .card-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 6px;
     }
 
     .btn-icon {
       background: transparent;
       border: none;
       cursor: pointer;
-      font-size: 1.05rem;
+      font-size: 0.9rem;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       color: #cbd5e1;
-      padding: 4px 6px;
-      border-radius: 6px;
-      transition: background 0.15s;
-    }
-
-    .btn-icon:hover {
-      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 4px;
     }
 
     .btn-icon.liked {
@@ -395,10 +363,6 @@
 
     .btn-delete-card {
       color: #f87171;
-    }
-
-    .btn-delete-card:hover {
-      background: rgba(248, 113, 113, 0.2);
     }
 
     .hidden {
@@ -414,11 +378,10 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.93);
+      background-color: rgba(0, 0, 0, 0.95);
       justify-content: center;
       align-items: center;
       overflow: hidden;
-      user-select: none;
     }
 
     .modal-main {
@@ -431,8 +394,8 @@
     }
 
     .modal-media-container {
-      max-width: 85%;
-      max-height: 85%;
+      max-width: 90%;
+      max-height: 80%;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -440,26 +403,18 @@
 
     .modal-content {
       max-width: 100%;
-      max-height: 80vh;
+      max-height: 75vh;
       border-radius: 8px;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
       object-fit: contain;
-      transition: transform 0.1s ease-out;
-      cursor: grab;
-    }
-
-    .modal-content:active {
-      cursor: grabbing;
     }
 
     .close-modal {
       position: absolute;
-      top: 20px;
-      right: 25px;
+      top: 15px;
+      right: 20px;
       color: #fff;
-      font-size: 38px;
+      font-size: 32px;
       font-weight: bold;
-      cursor: pointer;
       z-index: 1005;
     }
 
@@ -470,45 +425,33 @@
       background: rgba(0, 0, 0, 0.5);
       color: white;
       border: 1px solid rgba(255, 255, 255, 0.3);
-      font-size: 2rem;
-      padding: 10px 16px;
-      cursor: pointer;
+      font-size: 1.4rem;
+      padding: 6px 12px;
       border-radius: 50%;
       z-index: 1002;
-      transition: background 0.2s, transform 0.2s;
     }
 
-    .nav-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: translateY(-50%) scale(1.1);
-    }
-
-    .prev-btn { left: 20px; }
-    .next-btn { right: 20px; }
+    .prev-btn { left: 10px; }
+    .next-btn { right: 10px; }
 
     .zoom-controls {
       position: absolute;
-      bottom: 25px;
+      bottom: 20px;
       display: flex;
-      gap: 10px;
+      gap: 6px;
       z-index: 1002;
       flex-wrap: wrap;
       justify-content: center;
+      padding: 0 10px;
     }
 
     .zoom-btn {
       background: rgba(255, 255, 255, 0.2);
       color: white;
       border: 1px solid rgba(255, 255, 255, 0.4);
-      padding: 8px 16px;
-      font-size: 0.9rem;
-      border-radius: 20px;
-      cursor: pointer;
-      backdrop-filter: blur(5px);
-    }
-
-    .zoom-btn:hover {
-      background: rgba(255, 255, 255, 0.4);
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      border-radius: 16px;
     }
 
     /* Comentarios */
@@ -516,14 +459,14 @@
       position: absolute;
       right: 0;
       top: 0;
-      width: 340px;
+      width: 100%;
+      max-width: 340px;
       height: 100%;
       background: #1e293b;
       color: white;
       z-index: 1004;
       display: flex;
       flex-direction: column;
-      box-shadow: -4px 0 20px rgba(0,0,0,0.5);
       transform: translateX(100%);
       transition: transform 0.3s ease;
     }
@@ -533,149 +476,85 @@
     }
 
     .drawer-header {
-      padding: 18px;
+      padding: 15px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .drawer-header h3 {
-      font-size: 1.1rem;
-    }
-
     .close-drawer {
       background: transparent;
       border: none;
-      font-size: 1.4rem;
-      cursor: pointer;
+      font-size: 1.3rem;
       color: #94a3b8;
     }
 
     .comments-body {
       flex: 1;
-      padding: 15px;
+      padding: 12px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .comment-item {
       background: rgba(255, 255, 255, 0.05);
-      padding: 10px 12px;
+      padding: 8px 10px;
       border-radius: 8px;
-      font-size: 0.88rem;
-    }
-
-    .comment-item strong {
-      color: #38bdf8;
-      display: block;
-      margin-bottom: 3px;
-    }
-
-    .comment-item small {
-      color: #94a3b8;
-      font-size: 0.72rem;
-      float: right;
+      font-size: 0.82rem;
     }
 
     .drawer-footer {
-      padding: 15px;
+      padding: 12px;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
-      gap: 8px;
+      gap: 6px;
     }
 
     .drawer-footer input {
       flex: 1;
-      padding: 10px;
+      padding: 8px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 6px;
       color: white;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
 
-    .drawer-footer button {
-      padding: 10px 14px;
-      font-size: 0.9rem;
-    }
-
-    /* REGLAS RESPONSIVE PARA MÓVILES (Evita el zoom excesivo) */
-    @media (max-width: 600px) {
-      body {
-        padding: 10px;
-      }
-
-      h1 {
-        font-size: 1.5rem;
-      }
-
+    @media (max-width: 500px) {
       .user-header {
         flex-direction: column;
         align-items: stretch;
-        gap: 10px;
-        padding: 12px;
       }
-
-      .toolbar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-      }
-
       .filter-tabs {
-        justify-content: center;
         width: 100%;
+        justify-content: space-between;
       }
-
       .filter-btn {
-        padding: 6px 12px;
-        font-size: 0.78rem;
         flex: 1;
         text-align: center;
+        padding: 6px 4px;
+        font-size: 0.72rem;
       }
-
       .sort-btn {
         width: 100%;
-        text-align: center;
       }
-
-      .gallery-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 12px;
-      }
-
-      .gallery-card img, .gallery-card video {
-        height: 180px;
-      }
-
-      .comments-drawer {
-        width: 100%;
-      }
-
-      .nav-btn {
-        font-size: 1.5rem;
-        padding: 6px 12px;
-      }
-
-      .prev-btn { left: 8px; }
-      .next-btn { right: 8px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Contenedor de Notificaciones Toast -->
+  <!-- Toast -->
   <div id="toast-container" class="toast-container"></div>
 
   <h1>C U L O S</h1>
 
-  <!-- Formulario de Autenticación -->
+  <!-- Autenticación -->
   <div id="auth-box" class="auth-container">
     <h2>Inicio de sesión</h2>
-    <input type="text" id="display-name" placeholder="👤 Nombre o Apodo (solo para registro)">
+    <input type="text" id="display-name" placeholder="👤 Nombre o Apodo (solo registro)">
     <input type="email" id="email" placeholder="✉️ Correo electrónico" required>
     <input type="password" id="password" placeholder="🔒 Contraseña" required>
     
@@ -687,7 +566,7 @@
     <div id="error-message"></div>
   </div>
 
-  <!-- Panel de la Galería -->
+  <!-- Galería -->
   <div id="gallery-box" class="hidden">
     <div class="user-header">
       <div class="profile-card">
@@ -695,7 +574,7 @@
         <div class="profile-info">
           <span class="profile-email" id="user-email"></span>
           <div class="profile-actions">
-            <button class="btn-edit-name" onclick="editDisplayName()">✏️ Cambiar mi nombre</button>
+            <button class="btn-edit-name" onclick="editDisplayName()">✏️ Cambiar nombre</button>
             <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
           </div>
         </div>
@@ -708,7 +587,7 @@
       </div>
 
       <input type="file" id="catbox-file-input" accept="image/*,video/*" style="display: none;">
-      <button class="btn-login" id="upload-btn" style="flex: initial;">Subir Imagen/Video</button>
+      <button class="btn-login" id="upload-btn" style="flex: initial; width: 100%;">Subir Imagen/Video</button>
     </div>
 
     <div class="toolbar">
@@ -716,7 +595,7 @@
         <button class="filter-btn active" onclick="setFilter('all', this)">Todas</button>
         <button class="filter-btn" onclick="setFilter('photo', this)">📸 Fotos</button>
         <button class="filter-btn" onclick="setFilter('video', this)">🎥 Videos</button>
-        <button class="filter-btn" onclick="setFilter('mine', this)">👤 Mis Subidas</button>
+        <button class="filter-btn" onclick="setFilter('mine', this)">👤 Mías</button>
       </div>
 
       <button class="sort-btn" id="sort-btn" onclick="toggleSort()">⏱️ Más recientes</button>
@@ -725,7 +604,7 @@
     <div class="gallery-grid" id="gallery-grid"></div>
   </div>
 
-  <!-- Modal Interactivo con Zoom y Comentarios -->
+  <!-- Modal Zoom -->
   <div id="image-modal" class="modal">
     <span class="close-modal" onclick="closeZoom()">&times;</span>
     
@@ -741,7 +620,7 @@
       <div class="zoom-controls">
         <button class="zoom-btn" onclick="zoomIn(event)">🔍 + Zoom</button>
         <button class="zoom-btn" onclick="zoomOut(event)">🔍 - Reducir</button>
-        <button class="zoom-btn" onclick="resetZoom(event)">🔄 Restablecer</button>
+        <button class="zoom-btn" onclick="resetZoom(event)">🔄 Reset</button>
         <button class="zoom-btn" id="modal-like-btn" onclick="toggleModalLike()">❤️ Me gusta</button>
         <button class="zoom-btn" onclick="toggleCommentsDrawer()">💬 Comentarios</button>
       </div>
@@ -754,7 +633,7 @@
       </div>
       <div class="comments-body" id="comments-list"></div>
       <div class="drawer-footer">
-        <input type="text" id="comment-input" placeholder="Escribe un comentario...">
+        <input type="text" id="comment-input" placeholder="Comentario...">
         <button class="btn-login" onclick="submitComment()" style="flex: initial;">Enviar</button>
       </div>
     </div>
@@ -815,7 +694,7 @@
       errorMessage.innerText = "";
 
       if (!name) {
-        errorMessage.innerText = "Por favor, escribe tu nombre o apodo antes de registrarte.";
+        errorMessage.innerText = "Escribe tu nombre o apodo antes de registrarte.";
         return;
       }
 
@@ -926,7 +805,7 @@
 
         let mediaElement = '';
         if (item.type === 'video') {
-          mediaElement = `<video src="${item.url}" controls playsinline preload="metadata" style="width:100%; height:280px; object-fit:cover; background:#000;"></video>`;
+          mediaElement = `<video src="${item.url}" controls playsinline preload="metadata" style="width:100%; height:200px; object-fit:cover; background:#000;"></video>`;
         } else {
           mediaElement = `<img src="${item.url}" alt="Media" onclick="openZoom('${item.id}')">`;
         }
@@ -962,7 +841,7 @@
 
       const item = allMediaItems.find(i => i.id === id);
       if (!item || item.isStatic) {
-        showToast("Elemento local fijo no modificable", "info");
+        showToast("Elemento base no modificable", "info");
         return;
       }
 
@@ -983,9 +862,9 @@
       if (e) e.stopPropagation();
       if (!currentUser) return;
 
-      if (confirm("¿Seguro que quieres eliminar esta publicación permanentemente?")) {
+      if (confirm("¿Eliminar publicación?")) {
         db.collection('media').doc(id).delete().then(() => {
-          showToast("Publicación eliminada correctamente 🗑️", "success");
+          showToast("Eliminado correctamente 🗑️", "success");
           if (modal.style.display === "flex") closeZoom();
         }).catch(err => showToast("Error al eliminar: " + err.message, "error"));
       }
@@ -1095,12 +974,12 @@
 
     function loadComments(mediaId) {
       const list = document.getElementById('comments-list');
-      list.innerHTML = '<p style="color:#888;">Cargando comentarios...</p>';
+      list.innerHTML = '<p style="color:#888;">Cargando...</p>';
 
       if (unsubscribeComments) unsubscribeComments();
 
       if (mediaId.startsWith('static_')) {
-        list.innerHTML = '<p style="color:#888;">Los comentarios no están disponibles para archivos base locales.</p>';
+        list.innerHTML = '<p style="color:#888;">No disponible en archivos locales.</p>';
         return;
       }
 
@@ -1109,7 +988,7 @@
         .onSnapshot(snapshot => {
           list.innerHTML = '';
           if (snapshot.empty) {
-            list.innerHTML = '<p style="color:#888;">Sin comentarios aún. ¡Sé el primero!</p>';
+            list.innerHTML = '<p style="color:#888;">Sin comentarios.</p>';
             return;
           }
 
@@ -1118,7 +997,7 @@
             const div = document.createElement('div');
             div.className = 'comment-item';
             const timeStr = c.createdAt ? new Date(c.createdAt.toDate()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
-            div.innerHTML = `<small>${timeStr}</small><strong>${escapeHtml(c.userName)}</strong><span>${escapeHtml(c.text)}</span>`;
+            div.innerHTML = `<small style="float:right; color:#888;">${timeStr}</small><strong>${escapeHtml(c.userName)}</strong><br><span>${escapeHtml(c.text)}</span>`;
             list.appendChild(div);
           });
           list.scrollTop = list.scrollHeight;
@@ -1290,7 +1169,7 @@
         const file = e.target.files[0];
         if (!file || !currentUser) return;
 
-        showToast("Procesando y subiendo archivo... Por favor espera ⏳", "info");
+        showToast("Procesando y subiendo archivo... ⏳", "info");
 
         try {
           let mediaUrl = "";
@@ -1317,7 +1196,7 @@
             likes: []
           });
 
-          showToast("¡Archivo subido exitosamente! 🎉", "success");
+          showToast("¡Subido exitosamente! 🎉", "success");
           fileInput.value = "";
         } catch (err) {
           console.error("Error al subir:", err);
