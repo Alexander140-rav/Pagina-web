@@ -382,6 +382,7 @@
       justify-content: center;
       align-items: center;
       overflow: hidden;
+      touch-action: pan-y;
     }
 
     .modal-main {
@@ -1052,6 +1053,35 @@
     function resetZoom(e) {
       if (e) e.stopPropagation();
       resetZoomState();
+    }
+
+    /* DETECCIÓN DE GESTOS TÁCTILES (SWIPE DERECHA / IZQUIERDA) */
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    modal.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, false);
+
+    modal.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, false);
+
+    function handleSwipe() {
+      // Solo cambiar si la imagen no está con Zoom activo
+      if (currentScale > 1) return;
+
+      const swipeDistance = touchEndX - touchStartX;
+      const minSwipeDistance = 50; // Distancia mínima para detectar el deslizamiento
+
+      if (swipeDistance > minSwipeDistance) {
+        // Deslizar a la derecha = Imagen anterior
+        prevImage();
+      } else if (swipeDistance < -minSwipeDistance) {
+        // Deslizar a la izquierda = Siguiente imagen
+        nextImage();
+      }
     }
 
     window.addEventListener('keydown', (e) => {
