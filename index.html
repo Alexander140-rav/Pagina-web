@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CULOS</title>
+  <title>Acceso a la Galería</title>
+  
+  <!-- Firebase SDKs (Auth + Firestore) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
   <style>
     * {
       box-sizing: border-box;
@@ -12,9 +18,15 @@
       font-family: Arial, sans-serif;
     }
 
+    /* Fondo moderno con degradado oscuro */
     body {
-      background-color: #f4f4f9;
-      color: #333;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #f8fafc;
       padding: 20px;
     }
 
@@ -25,7 +37,7 @@
       letter-spacing: 2px;
     }
 
-    /* Notificaciones Flotantes (Toasts) */
+    /* Notificaciones Toast */
     .toast-container {
       position: fixed;
       top: 20px;
@@ -67,63 +79,88 @@
       transition: opacity 0.3s, transform 0.3s;
     }
 
-    /* Contenedor de Autenticación */
+    /* Tarjeta de Login con Glassmorphism */
     .auth-container {
-      max-width: 400px;
-      margin: 30px auto;
-      background: #ffffff;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      max-width: 420px;
+      width: 90%;
+      margin: 20px auto;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 35px 30px;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
       text-align: center;
     }
 
     .auth-container h2 {
-      margin-bottom: 20px;
-      font-size: 1.5rem;
+      margin-bottom: 25px;
+      font-size: 1.6rem;
+      color: #ffffff;
     }
 
     .auth-container input {
       width: 100%;
-      padding: 12px;
+      padding: 14px 16px;
       margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      color: #ffffff;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .auth-container input::placeholder {
+      color: #94a3b8;
+    }
+
+    .auth-container input:focus {
+      border-color: #38bdf8;
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
     }
 
     .btn-group {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       justify-content: center;
+      margin-top: 10px;
     }
 
     button {
-      padding: 10px 20px;
-      font-size: 1rem;
+      padding: 12px 20px;
+      font-size: 0.95rem;
       border: none;
-      border-radius: 6px;
+      border-radius: 10px;
       cursor: pointer;
       font-weight: bold;
-      transition: background-color 0.2s, transform 0.1s;
+      transition: all 0.2s ease;
+      flex: 1;
     }
 
     .btn-login {
-      background-color: #007bff;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
       color: white;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
     }
 
     .btn-login:hover {
-      background-color: #0056b3;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      transform: translateY(-1px);
     }
 
     .btn-register {
-      background-color: #28a745;
+      background-color: #10b981;
       color: white;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
 
     .btn-register:hover {
-      background-color: #1e7e34;
+      background-color: #059669;
+      transform: translateY(-1px);
     }
 
     .btn-logout {
@@ -141,7 +178,7 @@
     .btn-edit-name {
       background: transparent;
       border: none;
-      color: #007bff;
+      color: #38bdf8;
       font-size: 0.8rem;
       cursor: pointer;
       padding: 0;
@@ -149,23 +186,24 @@
     }
 
     #error-message {
-      color: #d9534f;
+      color: #f87171;
       margin-top: 15px;
       font-size: 0.9rem;
       word-break: break-word;
     }
 
-    /* Header del Usuario y Contador */
+    /* Panel de la Galería */
     .user-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       max-width: 1200px;
       margin: 0 auto 15px auto;
-      background: white;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
       padding: 12px 20px;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       flex-wrap: wrap;
       gap: 15px;
     }
@@ -200,7 +238,7 @@
     .profile-email {
       font-weight: bold;
       font-size: 1rem;
-      color: #222;
+      color: #ffffff;
     }
 
     .profile-actions {
@@ -210,23 +248,22 @@
     }
 
     .media-stats {
-      background: #f8f9fa;
-      border: 1px solid #e2e8f0;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       padding: 8px 16px;
       border-radius: 20px;
       font-size: 0.9rem;
       font-weight: bold;
-      color: #4a5568;
+      color: #cbd5e1;
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
     .media-stats strong {
-      color: #007bff;
+      color: #38bdf8;
     }
 
-    /* Barra de Filtros y Ordenamiento */
     .toolbar {
       max-width: 1200px;
       margin: 0 auto 20px auto;
@@ -244,8 +281,8 @@
     }
 
     .filter-btn {
-      background: #e2e8f0;
-      color: #4a5568;
+      background: rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
       padding: 8px 16px;
       border-radius: 20px;
       font-size: 0.88rem;
@@ -256,18 +293,18 @@
     }
 
     .filter-btn:hover {
-      background: #cbd5e1;
+      background: rgba(255, 255, 255, 0.2);
     }
 
     .filter-btn.active {
-      background: #007bff;
+      background: #3b82f6;
       color: white;
     }
 
     .sort-btn {
-      background: white;
-      color: #333;
-      border: 1px solid #ccc;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
       padding: 8px 14px;
       border-radius: 20px;
       font-size: 0.85rem;
@@ -275,7 +312,6 @@
       cursor: pointer;
     }
 
-    /* Cuadrícula de Galería y Tarjetas */
     .gallery-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -286,16 +322,17 @@
 
     .gallery-card {
       position: relative;
-      background: white;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .gallery-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
     }
 
     .gallery-card img, .gallery-card video {
@@ -312,14 +349,14 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #fff;
-      border-top: 1px solid #f0f0f0;
+      background: rgba(15, 23, 42, 0.8);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
       font-size: 0.85rem;
     }
 
     .author-tag {
       font-weight: 600;
-      color: #555;
+      color: #94a3b8;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -340,14 +377,14 @@
       display: flex;
       align-items: center;
       gap: 4px;
-      color: #666;
+      color: #cbd5e1;
       padding: 4px 6px;
       border-radius: 6px;
       transition: background 0.15s;
     }
 
     .btn-icon:hover {
-      background: #f0f0f0;
+      background: rgba(255, 255, 255, 0.1);
     }
 
     .btn-icon.liked {
@@ -355,18 +392,18 @@
     }
 
     .btn-delete-card {
-      color: #dc3545;
+      color: #f87171;
     }
 
     .btn-delete-card:hover {
-      background: #ffe5e5;
+      background: rgba(248, 113, 113, 0.2);
     }
 
     .hidden {
       display: none !important;
     }
 
-    /* Modal / Zoom Interactivo y Comentarios */
+    /* Modal / Zoom */
     .modal {
       display: none;
       position: fixed;
@@ -472,18 +509,19 @@
       background: rgba(255, 255, 255, 0.4);
     }
 
-    /* Drawer / Panel Lateral de Comentarios */
+    /* Comentarios */
     .comments-drawer {
       position: absolute;
       right: 0;
       top: 0;
       width: 340px;
       height: 100%;
-      background: #ffffff;
+      background: #1e293b;
+      color: white;
       z-index: 1004;
       display: flex;
       flex-direction: column;
-      box-shadow: -4px 0 20px rgba(0,0,0,0.3);
+      box-shadow: -4px 0 20px rgba(0,0,0,0.5);
       transform: translateX(100%);
       transition: transform 0.3s ease;
     }
@@ -494,7 +532,7 @@
 
     .drawer-header {
       padding: 18px;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -509,7 +547,7 @@
       border: none;
       font-size: 1.4rem;
       cursor: pointer;
-      color: #666;
+      color: #94a3b8;
     }
 
     .comments-body {
@@ -522,27 +560,27 @@
     }
 
     .comment-item {
-      background: #f8f9fa;
+      background: rgba(255, 255, 255, 0.05);
       padding: 10px 12px;
       border-radius: 8px;
       font-size: 0.88rem;
     }
 
     .comment-item strong {
-      color: #007bff;
+      color: #38bdf8;
       display: block;
       margin-bottom: 3px;
     }
 
     .comment-item small {
-      color: #888;
+      color: #94a3b8;
       font-size: 0.72rem;
       float: right;
     }
 
     .drawer-footer {
       padding: 15px;
-      border-top: 1px solid #eee;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       gap: 8px;
     }
@@ -550,8 +588,10 @@
     .drawer-footer input {
       flex: 1;
       padding: 10px;
-      border: 1px solid #ccc;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 6px;
+      color: white;
       font-size: 0.9rem;
     }
 
@@ -569,33 +609,30 @@
       .next-btn { right: 8px; }
     }
   </style>
-
-  <!-- Firebase SDKs (Auth + Firestore) -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
   <!-- Contenedor de Notificaciones Toast -->
   <div id="toast-container" class="toast-container"></div>
 
-  <h1>CULOS</h1>
+  <h1>Galería Privada</h1>
 
   <!-- Formulario de Autenticación -->
   <div id="auth-box" class="auth-container">
     <h2>Acceso a la Galería</h2>
-    <input type="text" id="display-name" placeholder="Tu Nombre o Apodo (solo para registro)">
-    <input type="email" id="email" placeholder="Correo electrónico" required>
-    <input type="password" id="password" placeholder="Contraseña" required>
+    <input type="text" id="display-name" placeholder="👤 Nombre o Apodo (solo para registro)">
+    <input type="email" id="email" placeholder="✉️ Correo electrónico" required>
+    <input type="password" id="password" placeholder="🔒 Contraseña" required>
+    
     <div class="btn-group">
       <button class="btn-login" onclick="login()">Iniciar Sesión</button>
       <button class="btn-register" onclick="register()">Registrarse</button>
     </div>
+
     <div id="error-message"></div>
   </div>
 
-  <!-- Panel de la Galería Privada/Compartida -->
+  <!-- Panel de la Galería -->
   <div id="gallery-box" class="hidden">
     <div class="user-header">
       <div class="profile-card">
@@ -615,12 +652,10 @@
         <span>🎥 <strong id="video-count">0</strong> Videos</span>
       </div>
 
-      <!-- Input de archivo oculto -->
       <input type="file" id="catbox-file-input" accept="image/*,video/*" style="display: none;">
-      <button class="btn-login" id="upload-btn">Subir Imagen/Video</button>
+      <button class="btn-login" id="upload-btn" style="flex: initial;">Subir Imagen/Video</button>
     </div>
 
-    <!-- Barra de Herramientas (Filtros y Orden) -->
     <div class="toolbar">
       <div class="filter-tabs">
         <button class="filter-btn active" onclick="setFilter('all', this)">Todas</button>
@@ -632,7 +667,6 @@
       <button class="sort-btn" id="sort-btn" onclick="toggleSort()">⏱️ Más recientes</button>
     </div>
 
-    <!-- Cuadrícula Principal -->
     <div class="gallery-grid" id="gallery-grid"></div>
   </div>
 
@@ -658,24 +692,20 @@
       </div>
     </div>
 
-    <!-- Panel Lateral de Comentarios -->
     <div class="comments-drawer" id="comments-drawer">
       <div class="drawer-header">
         <h3>💬 Comentarios</h3>
         <button class="close-drawer" onclick="toggleCommentsDrawer()">&times;</button>
       </div>
-      <div class="comments-body" id="comments-list">
-        <!-- Comentarios en tiempo real -->
-      </div>
+      <div class="comments-body" id="comments-list"></div>
       <div class="drawer-footer">
         <input type="text" id="comment-input" placeholder="Escribe un comentario...">
-        <button class="btn-login" onclick="submitComment()">Enviar</button>
+        <button class="btn-login" onclick="submitComment()" style="flex: initial;">Enviar</button>
       </div>
     </div>
   </div>
 
   <script>
-    // Configuración de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBnq4z7akcZA2o6FGCiSNIdtFB5eybZBAQ",
       authDomain: "galeria-amigos123.firebaseapp.com",
@@ -689,7 +719,6 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Elementos DOM
     const authBox = document.getElementById('auth-box');
     const galleryBox = document.getElementById('gallery-box');
     const userEmailSpan = document.getElementById('user-email');
@@ -703,16 +732,14 @@
 
     let allMediaItems = [];
     let activeFilter = 'all';
-    let activeSort = 'newest'; // 'newest' o 'oldest'
+    let activeSort = 'newest';
 
-    // Fotos de plantilla fijas base
     const staticLocalFiles = [
       "imagenes/28838659.jpg", "imagenes/images (1).jpg", "imagenes/images (2).jpg",
       "imagenes/images (3).jpg", "imagenes/images (4).jpg", "imagenes/images.jpg",
       "imagenes/Priscilla Lopez 2.jpeg", "imagenes/priscilla-lopez_01.jpg", "imagenes/Priscillalopezm.jpg"
     ];
 
-    // --- Sistema de Notificaciones Toast ---
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
@@ -726,7 +753,6 @@
       }, 3000);
     }
 
-    // --- Autenticación ---
     function register() {
       const name = document.getElementById('display-name').value.trim();
       const email = document.getElementById('email').value.trim();
@@ -780,7 +806,6 @@
       userAvatarDiv.innerText = nameToShow.charAt(0).toUpperCase();
     }
 
-    // --- Carga de datos y Renderizado ---
     function loadSavedMedia() {
       if (unsubscribeMedia) unsubscribeMedia();
 
@@ -791,7 +816,6 @@
             dynamicItems.push({ id: doc.id, ...doc.data() });
           });
 
-          // Unificar fotos locales fijas + fotos dinámicas de Firestore
           const staticItemsFormatted = staticLocalFiles.map((url, idx) => ({
             id: 'static_' + idx,
             url: url,
@@ -824,7 +848,6 @@
     function renderGallery() {
       grid.innerHTML = '';
 
-      // 1. Filtrado
       let filtered = allMediaItems.filter(item => {
         if (activeFilter === 'photo') return item.type !== 'video';
         if (activeFilter === 'video') return item.type === 'video';
@@ -832,14 +855,12 @@
         return true;
       });
 
-      // 2. Ordenamiento
       filtered.sort((a, b) => {
         const timeA = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt).getTime()) : 0;
         const timeB = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt).getTime()) : 0;
         return activeSort === 'newest' ? timeB - timeA : timeA - timeB;
       });
 
-      // 3. Renderizar Tarjetas
       filtered.forEach(item => {
         const card = document.createElement('div');
         card.className = 'gallery-card';
@@ -874,14 +895,12 @@
         grid.appendChild(card);
       });
 
-      // Actualizar Contador Global
       const totalPhotos = allMediaItems.filter(i => i.type !== 'video').length;
       const totalVideos = allMediaItems.filter(i => i.type === 'video').length;
       document.getElementById('photo-count').innerText = totalPhotos;
       document.getElementById('video-count').innerText = totalVideos;
     }
 
-    // --- Dar / Quitar Like ---
     function toggleLike(id, e) {
       if (e) e.stopPropagation();
       if (!currentUser) return;
@@ -905,7 +924,6 @@
       }
     }
 
-    // --- Eliminar Publicación ---
     function deleteMedia(id, e) {
       if (e) e.stopPropagation();
       if (!currentUser) return;
@@ -918,7 +936,6 @@
       }
     }
 
-    // Escuchar Estado de Sesión
     auth.onAuthStateChanged(user => {
       if (user) {
         currentUser = user;
@@ -937,10 +954,7 @@
       }
     });
 
-    // --- Modal, Zoom, Navegación y Comentarios ---
     let currentScale = 1;
-    let isDragging = false;
-    let startX = 0, startY = 0;
     let translateX = 0, translateY = 0;
 
     let currentModalMediaId = null;
@@ -1020,7 +1034,6 @@
       }
     }
 
-    // --- Comentarios en Tiempo Real ---
     function toggleCommentsDrawer() {
       commentsDrawer.classList.toggle('open');
     }
@@ -1075,7 +1088,6 @@
       }).catch(err => showToast("Error al comentar: " + err.message, "error"));
     }
 
-    // --- Zoom y Arrastre ---
     function resetZoomState() {
       currentScale = 1;
       translateX = 0;
@@ -1126,7 +1138,6 @@
       updateTransform();
     }, { passive: false });
 
-    // --- Subida de Archivos: Fotos (Base64 Canvas) / Videos (Servidor de medios directo) ---
     const fileInput = document.getElementById("catbox-file-input");
     const uploadBtn = document.getElementById("upload-btn");
 
@@ -1136,58 +1147,40 @@
     }
 
     async function uploadVideoToExternalServer(file) {
-      // Método 1: Catbox
       try {
         const formData = new FormData();
         formData.append('reqtype', 'fileupload');
         formData.append('fileToUpload', file);
-        const res = await fetch('https://catbox.moe/user/api.php', {
-          method: 'POST',
-          body: formData
-        });
+        const res = await fetch('https://catbox.moe/user/api.php', { method: 'POST', body: formData });
         if (res.ok) {
           const text = (await res.text()).trim();
           if (text.startsWith('http')) return text;
         }
-      } catch (e) {
-        console.warn("Catbox directo no respondió, probando alternativa...", e);
-      }
+      } catch (e) { console.warn("Catbox error", e); }
 
-      // Método 2: Litterbox
       try {
         const formData = new FormData();
         formData.append('reqtype', 'fileupload');
         formData.append('time', '72h');
         formData.append('fileToUpload', file);
-        const res = await fetch('https://litterbox.catbox.moe/resources/internals/api.php', {
-          method: 'POST',
-          body: formData
-        });
+        const res = await fetch('https://litterbox.catbox.moe/resources/internals/api.php', { method: 'POST', body: formData });
         if (res.ok) {
           const text = (await res.text()).trim();
           if (text.startsWith('http')) return text;
         }
-      } catch (e) {
-        console.warn("Litterbox no respondió, probando alternativa...", e);
-      }
+      } catch (e) { console.warn("Litterbox error", e); }
 
-      // Método 3: Tmpfiles con enlace directo /dl/
       try {
         const formData = new FormData();
         formData.append('file', file);
-        const res = await fetch('https://tmpfiles.org/api/v1/upload', {
-          method: 'POST',
-          body: formData
-        });
+        const res = await fetch('https://tmpfiles.org/api/v1/upload', { method: 'POST', body: formData });
         if (res.ok) {
           const json = await res.json();
           if (json && json.data && json.data.url) {
             return json.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
           }
         }
-      } catch (e) {
-        console.warn("Tmpfiles no respondió...", e);
-      }
+      } catch (e) { console.warn("Tmpfiles error", e); }
 
       throw new Error("No se pudo conectar con el servidor de videos.");
     }
@@ -1278,7 +1271,6 @@
       });
     }
 
-    // Escape de HTML seguro
     function escapeHtml(text) {
       if (!text) return '';
       return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
